@@ -2,440 +2,503 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📦 Scanner Estoque</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 Scanner Estoque - GitHub Pages</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- Biblioteca para exportar Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: #1e3c72;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
             min-height: 100vh;
-            padding: 10px;
-            overflow-x: hidden;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
+        .app-container {
+            width: 100%;
+            max-width: 800px;
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header-content {
             display: flex;
             flex-direction: column;
-            min-height: calc(100vh - 20px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        header {
-            background: #1e3c72;
-            color: white;
-            padding: 20px 15px;
-            text-align: center;
-            border-bottom: 3px solid #2a5298;
-        }
-
-        header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-            display: flex;
             align-items: center;
-            justify-content: center;
             gap: 10px;
         }
 
-        header p {
-            opacity: 0.9;
-            font-size: 1rem;
-            line-height: 1.4;
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 2rem;
+            font-weight: 700;
         }
 
-        .scanning-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding: 15px;
-            background: #f5f7fa;
-            flex: 1;
+        .github-badge {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scanner-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 25px;
+            background: #f8fafc;
+        }
+
+        @media (min-width: 768px) {
+            .scanner-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .quantity-section {
+                grid-column: span 2;
+            }
         }
 
         .scanner-card {
             background: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-top: 4px solid;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border-top: 5px solid;
+            transition: transform 0.3s ease;
         }
 
-        .scanner-card.product {
-            border-color: #00ff88;
+        .scanner-card:hover {
+            transform: translateY(-5px);
         }
 
-        .scanner-card.location {
-            border-color: #0088ff;
-        }
-
-        .scanner-card.quantity {
-            border-color: #ff6b6b;
-        }
-
-        .scanner-header {
+        .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        .scanner-header h2 {
-            color: #1e3c72;
+        .card-title {
+            font-size: 1.4rem;
+            color: #1a2980;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 1.3rem;
+            gap: 10px;
         }
 
         .scan-counter {
-            display: inline-flex;
+            background: #1a2980;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
             align-items: center;
             justify-content: center;
-            width: 24px;
-            height: 24px;
-            background: #1e3c72;
-            color: white;
-            border-radius: 50%;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
-        .scanner-area {
+        .camera-container {
             width: 100%;
             background: #000;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            margin-bottom: 15px;
-            min-height: 200px;
+            margin: 15px 0;
+            min-height: 250px;
             position: relative;
-            border: 2px solid #ddd;
+            border: 3px solid #e2e8f0;
         }
 
-        .scanner-overlay {
+        .camera-placeholder {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 180px;
-            height: 180px;
-            border: 3px solid;
-            border-radius: 10px;
+            text-align: center;
+            color: white;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 220px;
+            border: 4px solid;
+            border-radius: 15px;
             box-shadow: 0 0 0 1000px rgba(0,0,0,0.7);
-            z-index: 100;
+            z-index: 10;
+            display: none;
         }
 
-        .overlay-product {
-            border-color: #00ff88;
+        .scanner-active .camera-overlay {
+            display: block;
+            animation: pulse 2s infinite;
         }
 
-        .overlay-location {
-            border-color: #0088ff;
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
         }
 
-        .scanned-value {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 10px;
-            border-left: 4px solid #1e3c72;
+        .overlay-green {
+            border-color: #10b981;
+            box-shadow: 0 0 20px #10b981;
         }
 
-        .scanned-value h4 {
-            color: #333;
-            margin-bottom: 5px;
+        .overlay-blue {
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px #3b82f6;
+        }
+
+        .scanned-result {
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid #1a2980;
+        }
+
+        .result-label {
+            color: #64748b;
             font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
         }
 
-        .scanned-value p {
-            color: #1e3c72;
-            font-size: 1.2rem;
-            font-weight: bold;
+        .result-value {
+            color: #1a2980;
+            font-size: 1.3rem;
+            font-weight: 700;
             word-break: break-all;
-            min-height: 24px;
+            min-height: 28px;
         }
 
-        .scanner-controls {
+        .btn-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-top: 15px;
         }
 
         .btn {
-            padding: 14px;
+            padding: 16px;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 10px;
+            font-size: 1.05rem;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
+            gap: 10px;
         }
 
         .btn:active {
             transform: scale(0.97);
-            opacity: 0.9;
         }
 
         .btn-primary {
-            background: #1e3c72;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
             color: white;
         }
 
         .btn-secondary {
-            background: #6c757d;
+            background: #64748b;
             color: white;
         }
 
         .btn-success {
-            background: #28a745;
+            background: linear-gradient(135deg, #10b981, #34d399);
             color: white;
         }
 
         .btn-warning {
-            background: #ffc107;
-            color: #333;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: #1f2937;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
         }
 
         .btn:disabled {
-            opacity: 0.5;
+            opacity: 0.6;
             cursor: not-allowed;
+            transform: none !important;
         }
 
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .qty-display {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #1e3c72;
-            min-width: 60px;
+        /* NOVO ESTILO PARA QUANTIDADE SIMPLES */
+        .quantity-simple {
+            margin: 25px 0;
             text-align: center;
         }
 
-        .qty-btn {
-            width: 50px;
-            height: 50px;
-            border: none;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .qty-btn:active {
-            transform: scale(0.9);
-        }
-
-        .qty-minus {
-            background: #ff6b6b;
-            color: white;
-        }
-
-        .qty-plus {
-            background: #1e3c72;
-            color: white;
-        }
-
-        .qty-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+        .quantity-label {
+            color: #64748b;
             font-size: 1.1rem;
-            text-align: center;
+            font-weight: 600;
             margin-bottom: 15px;
-        }
-
-        .qty-input:focus {
-            border-color: #1e3c72;
-            outline: none;
-        }
-
-        .status-indicator {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            margin: 15px 0;
+            gap: 10px;
+        }
+
+        .quantity-input-simple {
+            width: 100%;
+            padding: 20px;
+            border: 3px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1.8rem;
             text-align: center;
-            min-height: 50px;
+            font-weight: 700;
+            color: #1a2980;
+            background: #f8fafc;
+            transition: all 0.3s;
+            -moz-appearance: textfield; /* Remove setas no Firefox */
+        }
+
+        .quantity-input-simple::-webkit-outer-spin-button,
+        .quantity-input-simple::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .quantity-input-simple:focus {
+            border-color: #1a2980;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(26, 41, 128, 0.1);
+            background: white;
+            transform: scale(1.02);
+        }
+
+        .quantity-hint {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .status-message {
+            padding: 18px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.1rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .status-ready {
-            background: #d4edda;
-            color: #155724;
-            border: 2px solid #155724;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border: 3px solid #10b981;
         }
 
         .status-waiting {
-            background: #fff3cd;
-            color: #856404;
-            border: 2px solid #856404;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            border: 3px solid #f59e0b;
         }
 
-        .quick-actions {
+        .actions-bar {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            padding: 15px;
-            background: #f5f7fa;
-            border-top: 1px solid #e9ecef;
+            gap: 15px;
+            padding: 20px 25px;
+            background: #f8fafc;
+            border-top: 2px solid #e2e8f0;
         }
 
-        .data-section {
-            padding: 15px;
+        .history-section {
+            padding: 25px;
             background: white;
         }
 
-        .data-section h3 {
-            color: #1e3c72;
-            margin-bottom: 15px;
-            font-size: 1.4rem;
+        .section-title {
+            color: #1a2980;
+            font-size: 1.6rem;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
         }
 
-        .table-container {
-            overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-
-        table {
+        .history-table {
             width: 100%;
             border-collapse: collapse;
             background: white;
-            min-width: 600px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
 
-        th {
-            background: #1e3c72;
+        .history-table th {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
             color: white;
-            padding: 12px;
+            padding: 18px 16px;
             text-align: left;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
+        .history-table td {
+            padding: 16px;
+            border-bottom: 2px solid #f1f5f9;
             vertical-align: middle;
-            font-size: 0.95rem;
         }
 
-        tr:last-child td {
+        .history-table tr:last-child td {
             border-bottom: none;
         }
 
-        .badge-scan {
-            background: #e3f2fd;
-            color: #0d47a1;
-            font-size: 0.75rem;
-            padding: 3px 8px;
-            border-radius: 4px;
+        .history-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
             font-weight: 600;
             display: inline-block;
-            margin-top: 4px;
         }
 
-        .delete-btn {
-            background: #ff6b6b;
-            color: white;
+        .badge-scanned {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-manual {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .delete-action {
+            background: #fee2e2;
+            color: #dc2626;
             border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.85rem;
             font-weight: 600;
+            transition: all 0.2s;
         }
 
-        .delete-btn:active {
-            transform: scale(0.95);
+        .delete-action:hover {
+            background: #fecaca;
+            transform: scale(1.05);
         }
 
-        .no-data {
+        .empty-state {
             text-align: center;
-            padding: 40px 20px;
-            color: #6c757d;
+            padding: 60px 20px;
+            color: #64748b;
             font-style: italic;
-            font-size: 1rem;
-            background: #f8f9fa;
+            font-size: 1.1rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin: 10px 0;
         }
 
-        footer {
+        .app-footer {
             text-align: center;
-            padding: 15px;
-            color: #666;
-            font-size: 0.85rem;
-            border-top: 1px solid #eee;
-            background: #f8f9fa;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 2px solid #e2e8f0;
+            background: #f8fafc;
+            line-height: 1.6;
         }
 
-        .simple-notification {
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            color: #1a2980;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .notification {
             position: fixed;
-            top: 20px;
+            top: 25px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 12px 20px;
-            border-radius: 8px;
+            padding: 16px 24px;
+            border-radius: 12px;
             color: white;
             font-weight: 600;
-            z-index: 1001;
-            animation: slideIn 0.3s ease;
+            z-index: 1000;
+            animation: slideDown 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            gap: 12px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.2);
             max-width: 90%;
             text-align: center;
         }
 
-        .simple-notification.success {
-            background: #28a745;
-        }
-
-        .simple-notification.error {
-            background: #dc3545;
-        }
-
-        .simple-notification.info {
-            background: #1e3c72;
-        }
-
-        @keyframes slideIn {
+        @keyframes slideDown {
             from { 
-                transform: translateX(-50%) translateY(-20px); 
+                transform: translateX(-50%) translateY(-30px); 
                 opacity: 0;
             }
             to { 
@@ -444,161 +507,250 @@
             }
         }
 
-        @media (min-width: 768px) {
-            .container {
-                max-width: 700px;
-                margin: 20px auto;
+        .notification-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+        }
+
+        .notification-error {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+        }
+
+        .notification-info {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        }
+
+        .github-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #24292e;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 1.6rem;
             }
-            
-            .scanning-panel {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
+            .quantity-input-simple {
+                font-size: 1.5rem;
+                padding: 16px;
             }
-            
-            .scanner-card.quantity {
-                grid-column: span 2;
+            .github-link {
+                bottom: 15px;
+                right: 15px;
+                font-size: 0.9rem;
+                padding: 10px 16px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📦 Scanner Estoque</h1>
-            <p>Escaneie produto → local → defina quantidade → salve</p>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="app-title">
+                    <span>📦</span>
+                    <h1>Scanner Estoque</h1>
+                </div>
+                <p>Escaneie produto e local, digite quantidade e salve</p>
+                <div class="github-badge">
+                    🌐 Hospedado no GitHub Pages
+                </div>
+            </div>
         </header>
 
-        <div class="scanning-panel">
+        <main class="scanner-grid">
             <!-- Scanner de Produto -->
-            <div class="scanner-card product">
-                <div class="scanner-header">
-                    <h2><span style="color: #00ff88;">📦</span> Produto</h2>
-                    <div class="scan-counter" id="productScanCount">0</div>
+            <div class="scanner-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span style="color: #10b981;">📦</span> Produto
+                    </h2>
+                    <div class="scan-counter" id="productCount">0</div>
                 </div>
                 
-                <div class="scanner-area" id="productScanner">
-                    <div class="scanner-overlay overlay-product"></div>
+                <div class="camera-container" id="productCamera">
+                    <div class="camera-placeholder">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">📷</div>
+                        <div style="font-size: 1.1rem; margin-bottom: 8px;">Scanner de Produto</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Toque em "Iniciar Scanner"</div>
+                    </div>
+                    <div class="camera-overlay overlay-green"></div>
                 </div>
                 
-                <div class="scanned-value">
-                    <h4>Código do Produto:</h4>
-                    <p id="currentProduct">Nenhum produto escaneado</p>
+                <div class="scanned-result">
+                    <div class="result-label">Código do Produto:</div>
+                    <div class="result-value" id="productResult">Nenhum produto escaneado</div>
                 </div>
                 
-                <div class="scanner-controls">
-                    <button id="startProductScanner" class="btn btn-primary">
-                        ▶ Iniciar
+                <div class="btn-group">
+                    <button id="startProductBtn" class="btn btn-primary">
+                        <span>▶</span> Iniciar Scanner
                     </button>
-                    <button id="stopProductScanner" class="btn btn-secondary" disabled>
-                        ⏹ Parar
+                    <button id="stopProductBtn" class="btn btn-secondary" disabled>
+                        <span>⏹</span> Parar Scanner
                     </button>
                 </div>
             </div>
 
             <!-- Scanner de Local -->
-            <div class="scanner-card location">
-                <div class="scanner-header">
-                    <h2><span style="color: #0088ff;">📍</span> Local</h2>
-                    <div class="scan-counter" id="locationScanCount">0</div>
+            <div class="scanner-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span style="color: #3b82f6;">📍</span> Local
+                    </h2>
+                    <div class="scan-counter" id="locationCount">0</div>
                 </div>
                 
-                <div class="scanner-area" id="locationScanner">
-                    <div class="scanner-overlay overlay-location"></div>
+                <div class="camera-container" id="locationCamera">
+                    <div class="camera-placeholder">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">📷</div>
+                        <div style="font-size: 1.1rem; margin-bottom: 8px;">Scanner de Local</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Toque em "Iniciar Scanner"</div>
+                    </div>
+                    <div class="camera-overlay overlay-blue"></div>
                 </div>
                 
-                <div class="scanned-value">
-                    <h4>Local Escaneado:</h4>
-                    <p id="currentLocation">Nenhum local escaneado</p>
+                <div class="scanned-result">
+                    <div class="result-label">Local Escaneado:</div>
+                    <div class="result-value" id="locationResult">Nenhum local escaneado</div>
                 </div>
                 
-                <div class="scanner-controls">
-                    <button id="startLocationScanner" class="btn btn-primary">
-                        ▶ Iniciar
+                <div class="btn-group">
+                    <button id="startLocationBtn" class="btn btn-primary">
+                        <span>▶</span> Iniciar Scanner
                     </button>
-                    <button id="stopLocationScanner" class="btn btn-secondary" disabled>
-                        ⏹ Parar
-                    </button>
-                </div>
-            </div>
-
-            <!-- Controle de Quantidade -->
-            <div class="scanner-card quantity">
-                <div class="scanner-header">
-                    <h2><span style="color: #ff6b6b;">🔢</span> Quantidade</h2>
-                </div>
-                
-                <div class="quantity-controls">
-                    <button id="decreaseQty" class="qty-btn qty-minus">-</button>
-                    <div class="qty-display" id="quantityDisplay">1</div>
-                    <button id="increaseQty" class="qty-btn qty-plus">+</button>
-                </div>
-                
-                <input type="number" id="manualQuantity" class="qty-input" 
-                       placeholder="Ou digite a quantidade" min="1" max="9999" value="1">
-                
-                <div class="status-indicator" id="scanStatus">
-                    ⏳ Aguardando escaneamento...
-                </div>
-                
-                <div class="scanner-controls">
-                    <button id="saveItem" class="btn btn-success" disabled>
-                        💾 Salvar Item
-                    </button>
-                    <button id="clearCurrent" class="btn btn-warning">
-                        🗑️ Limpar
+                    <button id="stopLocationBtn" class="btn btn-secondary" disabled>
+                        <span>⏹</span> Parar Scanner
                     </button>
                 </div>
             </div>
+
+            <!-- NOVO: Controle de Quantidade Simples -->
+            <div class="scanner-card quantity-section">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span style="color: #f59e0b;">🔢</span> Quantidade
+                    </h2>
+                </div>
+                
+                <div class="quantity-simple">
+                    <div class="quantity-label">
+                        <span>Digite a quantidade:</span>
+                    </div>
+                    <input 
+                        type="number" 
+                        id="quantitySimple" 
+                        class="quantity-input-simple"
+                        placeholder="0"
+                        value="1"
+                        min="1"
+                        step="1"
+                        inputmode="numeric"
+                        pattern="[0-9]*"
+                    >
+                    <div class="quantity-hint">
+                        Digite apenas números (ex: 1, 10, 100, 1000)
+                    </div>
+                </div>
+                
+                <div class="status-message" id="statusMessage">
+                    ⏳ Aguardando escaneamento de produto e local...
+                </div>
+                
+                <div class="btn-group">
+                    <button id="saveItemBtn" class="btn btn-success" disabled>
+                        <span>💾</span> Salvar Item no Estoque
+                    </button>
+                    <button id="clearDataBtn" class="btn btn-warning">
+                        <span>🗑️</span> Limpar Dados Atuais
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <div class="actions-bar">
+            <button id="addManualBtn" class="btn btn-primary">
+                <span>✏️</span> Adicionar Manualmente
+            </button>
+            <!-- MUDADO: Botão para exportar Excel -->
+            <button id="exportExcelBtn" class="btn btn-success">
+                <span>📊</span> Exportar para Excel (.XLSX)
+            </button>
         </div>
 
-        <div class="quick-actions">
-            <button id="addManualEntry" class="btn btn-primary">
-                ✏️ Adicionar Manual
-            </button>
-            <button id="exportData" class="btn btn-success">
-                📥 Exportar CSV
-            </button>
-        </div>
-
-        <div class="data-section">
-            <h3>📊 Histórico de Itens</h3>
-            <div class="table-container">
-                <table>
+        <section class="history-section">
+            <h3 class="section-title">
+                <span>📋</span> Histórico de Itens
+            </h3>
+            
+            <div class="table-wrapper">
+                <table class="history-table">
                     <thead>
                         <tr>
                             <th>Produto</th>
                             <th>Local</th>
-                            <th>Qtd</th>
+                            <th>Quantidade</th>
                             <th>Data/Hora</th>
+                            <th>Tipo</th>
                             <th>Ação</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody">
+                    <tbody id="historyBody">
                         <tr>
-                            <td colspan="5" class="no-data">
-                                Nenhum item adicionado ainda
+                            <td colspan="6" class="empty-state">
+                                Nenhum item adicionado ainda. Comece escaneando!
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
+        </section>
 
-        <footer>
-            <p>Itens: <strong id="totalItems">0</strong> | Última atualização: <strong id="lastUpdate">-</strong></p>
-            <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Página web - Funciona no Chrome Android</p>
+        <footer class="app-footer">
+            <div>
+                <p>Sistema de Escaneamento de Estoque • Hospedado no GitHub Pages</p>
+                <p>Exportação em Excel (.XLSX) • Dados salvos localmente</p>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalItems">0</div>
+                    <div class="stat-label">Itens Totais</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalQuantity">0</div>
+                    <div class="stat-label">Quantidade Total</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="lastUpdate">-</div>
+                    <div class="stat-label">Última Atualização</div>
+                </div>
+            </div>
         </footer>
     </div>
 
-    <!-- Notificação Simples -->
-    <div id="notification" class="simple-notification" style="display: none;"></div>
+    <!-- Notificação -->
+    <div id="notification" class="notification" style="display: none;"></div>
+
+    <!-- Link para GitHub -->
+    <a href="https://github.com" target="_blank" class="github-link">
+        <span>🐙</span> GitHub Pages
+    </a>
 
     <script>
         // ====================
         // ESTADO DO SISTEMA
         // ====================
-        const state = {
+        const appState = {
             currentProduct: null,
             currentLocation: null,
             currentQuantity: 1,
@@ -606,43 +758,41 @@
             locationScanner: null,
             isProductScanning: false,
             isLocationScanning: false,
-            scannedItems: JSON.parse(localStorage.getItem('scannedItems')) || [],
-            productScanCount: parseInt(localStorage.getItem('productScanCount')) || 0,
-            locationScanCount: parseInt(localStorage.getItem('locationScanCount')) || 0
+            scannedItems: JSON.parse(localStorage.getItem('estoqueItems')) || [],
+            productCount: parseInt(localStorage.getItem('productCount')) || 0,
+            locationCount: parseInt(localStorage.getItem('locationCount')) || 0
         };
 
         // ====================
         // ELEMENTOS DOM
         // ====================
-        const elements = {
+        const DOM = {
             // Scanners
-            productScanner: document.getElementById('productScanner'),
-            locationScanner: document.getElementById('locationScanner'),
-            startProductScanner: document.getElementById('startProductScanner'),
-            stopProductScanner: document.getElementById('stopProductScanner'),
-            startLocationScanner: document.getElementById('startLocationScanner'),
-            stopLocationScanner: document.getElementById('stopLocationScanner'),
-            productScanCount: document.getElementById('productScanCount'),
-            locationScanCount: document.getElementById('locationScanCount'),
-            currentProduct: document.getElementById('currentProduct'),
-            currentLocation: document.getElementById('currentLocation'),
+            productCamera: document.getElementById('productCamera'),
+            locationCamera: document.getElementById('locationCamera'),
+            startProductBtn: document.getElementById('startProductBtn'),
+            stopProductBtn: document.getElementById('stopProductBtn'),
+            startLocationBtn: document.getElementById('startLocationBtn'),
+            stopLocationBtn: document.getElementById('stopLocationBtn'),
+            productCount: document.getElementById('productCount'),
+            locationCount: document.getElementById('locationCount'),
+            productResult: document.getElementById('productResult'),
+            locationResult: document.getElementById('locationResult'),
             
-            // Quantidade
-            quantityDisplay: document.getElementById('quantityDisplay'),
-            manualQuantity: document.getElementById('manualQuantity'),
-            decreaseQty: document.getElementById('decreaseQty'),
-            increaseQty: document.getElementById('increaseQty'),
+            // NOVO: Quantidade Simples
+            quantitySimple: document.getElementById('quantitySimple'),
             
             // Status e ações
-            scanStatus: document.getElementById('scanStatus'),
-            saveItem: document.getElementById('saveItem'),
-            clearCurrent: document.getElementById('clearCurrent'),
-            addManualEntry: document.getElementById('addManualEntry'),
-            exportData: document.getElementById('exportData'),
+            statusMessage: document.getElementById('statusMessage'),
+            saveItemBtn: document.getElementById('saveItemBtn'),
+            clearDataBtn: document.getElementById('clearDataBtn'),
+            addManualBtn: document.getElementById('addManualBtn'),
+            exportExcelBtn: document.getElementById('exportExcelBtn'), // MUDADO
             
-            // Tabela
-            tableBody: document.getElementById('tableBody'),
+            // Histórico
+            historyBody: document.getElementById('historyBody'),
             totalItems: document.getElementById('totalItems'),
+            totalQuantity: document.getElementById('totalQuantity'),
             lastUpdate: document.getElementById('lastUpdate'),
             
             // Notificação
@@ -653,199 +803,227 @@
         // INICIALIZAÇÃO
         // ====================
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('Scanner Estoque - Página Web');
-            initScanners();
+            console.log('🚀 Scanner Estoque - GitHub Pages');
+            console.log('📊 Exportação Excel (.XLSX) habilitada');
+            
+            initApp();
             setupEventListeners();
             updateUI();
-            updateScanStatus();
-            updateCounters();
             
-            // Mostrar mensagem inicial
+            // Mostrar mensagem de boas-vindas
             setTimeout(() => {
-                showNotification('Pronto para escanear!', 'info');
-            }, 500);
+                showNotification('✅ Sistema pronto! Exportação em Excel disponível', 'success');
+            }, 800);
         });
+
+        function initApp() {
+            // Inicializar scanners
+            appState.productScanner = new Html5Qrcode("productCamera");
+            appState.locationScanner = new Html5Qrcode("locationCamera");
+            
+            // Configurar input de quantidade
+            setupQuantityInput();
+            
+            // Atualizar contadores
+            updateCounters();
+            updateStats();
+        }
+
+        function setupQuantityInput() {
+            // Permitir apenas números e sem limites rígidos
+            DOM.quantitySimple.addEventListener('input', function(e) {
+                // Remover caracteres não numéricos
+                let value = this.value.replace(/[^0-9]/g, '');
+                
+                // Se estiver vazio, definir como 1
+                if (value === '' || value === '0') {
+                    value = '1';
+                }
+                
+                // Limitar a 10 dígitos (opcional, pode remover)
+                if (value.length > 10) {
+                    value = value.substring(0, 10);
+                }
+                
+                this.value = value;
+                appState.currentQuantity = parseInt(value) || 1;
+            });
+            
+            // Permitir colar apenas números
+            DOM.quantitySimple.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text');
+                const numbers = pastedData.replace(/[^0-9]/g, '');
+                this.value = numbers || '1';
+                appState.currentQuantity = parseInt(numbers) || 1;
+            });
+        }
+
+        function setupEventListeners() {
+            // Eventos dos scanners
+            DOM.startProductBtn.addEventListener('click', () => startScanner('product'));
+            DOM.stopProductBtn.addEventListener('click', () => stopScanner('product'));
+            DOM.startLocationBtn.addEventListener('click', () => startScanner('location'));
+            DOM.stopLocationBtn.addEventListener('click', () => stopScanner('location'));
+            
+            // Eventos principais
+            DOM.saveItemBtn.addEventListener('click', saveCurrentItem);
+            DOM.clearDataBtn.addEventListener('click', clearCurrentData);
+            DOM.addManualBtn.addEventListener('click', addManualItem);
+            DOM.exportExcelBtn.addEventListener('click', exportToExcel); // MUDADO
+        }
 
         // ====================
         // FUNÇÕES DO SCANNER
         // ====================
-        function initScanners() {
-            try {
-                state.productScanner = new Html5Qrcode("productScanner");
-                state.locationScanner = new Html5Qrcode("locationScanner");
-                console.log('Scanners prontos');
-            } catch (error) {
-                console.error('Erro nos scanners:', error);
-                showNotification('Erro ao iniciar scanners', 'error');
-            }
-        }
-
-        function setupEventListeners() {
-            // Scanners
-            elements.startProductScanner.addEventListener('click', () => startScanner('product'));
-            elements.stopProductScanner.addEventListener('click', () => stopScanner('product'));
-            elements.startLocationScanner.addEventListener('click', () => startScanner('location'));
-            elements.stopLocationScanner.addEventListener('click', () => stopScanner('location'));
-            
-            // Quantidade
-            elements.decreaseQty.addEventListener('click', decreaseQuantity);
-            elements.increaseQty.addEventListener('click', increaseQuantity);
-            elements.manualQuantity.addEventListener('input', updateQuantityFromInput);
-            
-            // Ações
-            elements.saveItem.addEventListener('click', saveCurrentItem);
-            elements.clearCurrent.addEventListener('click', clearCurrentData);
-            elements.addManualEntry.addEventListener('click', addManualEntry);
-            elements.exportData.addEventListener('click', exportToCSV);
-        }
-
         async function startScanner(type) {
-            if ((type === 'product' && state.isProductScanning) || 
-                (type === 'location' && state.isLocationScanning)) {
+            if ((type === 'product' && appState.isProductScanning) || 
+                (type === 'location' && appState.isLocationScanning)) {
                 return;
             }
             
             try {
                 const cameras = await Html5Qrcode.getCameras();
                 if (cameras.length === 0) {
-                    showNotification('Nenhuma câmera encontrada!', 'error');
-                    return;
+                    throw new Error('Nenhuma câmera detectada');
                 }
                 
-                const cameraId = cameras.find(c => c.label.toLowerCase().includes('back'))?.id || cameras[0].id;
-                const scanner = type === 'product' ? state.productScanner : state.locationScanner;
+                // Escolher câmera (preferir traseira)
+                const cameraId = cameras.find(c => 
+                    c.label.toLowerCase().includes('back') || 
+                    c.label.includes('2')
+                )?.id || cameras[0].id;
+                
+                const scanner = type === 'product' ? appState.productScanner : appState.locationScanner;
+                const cameraElement = type === 'product' ? DOM.productCamera : DOM.locationCamera;
+                
+                // Ativar visualmente
+                cameraElement.classList.add('scanner-active');
                 
                 await scanner.start(
                     cameraId,
                     {
                         fps: 10,
-                        qrbox: { width: 180, height: 180 },
+                        qrbox: { width: 250, height: 250 },
                         aspectRatio: 1.0
                     },
-                    (decodedText) => onScanSuccess(type, decodedText),
-                    (error) => onScanError(type, error)
+                    (decodedText) => handleScanSuccess(type, decodedText),
+                    (error) => {
+                        // Ignorar erros de "não encontrado"
+                        if (!error.includes("No MultiFormat Readers")) {
+                            console.warn(`Scanner ${type}:`, error);
+                        }
+                    }
                 );
                 
+                // Atualizar estado
                 if (type === 'product') {
-                    state.isProductScanning = true;
-                    elements.startProductScanner.disabled = true;
-                    elements.stopProductScanner.disabled = false;
+                    appState.isProductScanning = true;
+                    DOM.startProductBtn.disabled = true;
+                    DOM.stopProductBtn.disabled = false;
                 } else {
-                    state.isLocationScanning = true;
-                    elements.startLocationScanner.disabled = true;
-                    elements.stopLocationScanner.disabled = false;
+                    appState.isLocationScanning = true;
+                    DOM.startLocationBtn.disabled = true;
+                    DOM.stopLocationBtn.disabled = false;
                 }
                 
-                showNotification(`Scanner ${type === 'product' ? 'Produto' : 'Local'} iniciado`, 'info');
+                showNotification(`Scanner ${type === 'product' ? 'Produto' : 'Local'} ativado`, 'info');
+                
             } catch (error) {
-                console.error(`Erro scanner ${type}:`, error);
-                showNotification('Erro ao acessar câmera', 'error');
+                console.error(`Erro ao iniciar scanner ${type}:`, error);
+                showNotification('Erro ao acessar câmera. Verifique as permissões.', 'error');
+                
+                // Remover classe visual em caso de erro
+                const cameraElement = type === 'product' ? DOM.productCamera : DOM.locationCamera;
+                cameraElement.classList.remove('scanner-active');
             }
         }
 
         function stopScanner(type) {
-            const scanner = type === 'product' ? state.productScanner : state.locationScanner;
-            const isScanning = type === 'product' ? state.isProductScanning : state.isLocationScanning;
+            const scanner = type === 'product' ? appState.productScanner : appState.locationScanner;
+            const isScanning = type === 'product' ? appState.isProductScanning : appState.isLocationScanning;
             
-            if (!isScanning) return;
+            if (!isScanning || !scanner) return;
             
             scanner.stop().then(() => {
+                // Atualizar estado
                 if (type === 'product') {
-                    state.isProductScanning = false;
-                    elements.startProductScanner.disabled = false;
-                    elements.stopProductScanner.disabled = true;
+                    appState.isProductScanning = false;
+                    DOM.startProductBtn.disabled = false;
+                    DOM.stopProductBtn.disabled = true;
                 } else {
-                    state.isLocationScanning = false;
-                    elements.startLocationScanner.disabled = false;
-                    elements.stopLocationScanner.disabled = true;
+                    appState.isLocationScanning = false;
+                    DOM.startLocationBtn.disabled = false;
+                    DOM.stopLocationBtn.disabled = true;
                 }
+                
+                // Remover classe visual
+                const cameraElement = type === 'product' ? DOM.productCamera : DOM.locationCamera;
+                cameraElement.classList.remove('scanner-active');
+                
             }).catch(console.error);
         }
 
-        function onScanSuccess(type, decodedText) {
+        function handleScanSuccess(type, decodedText) {
             const value = decodedText.trim();
             
-            // Vibrar (se suportado)
-            if (navigator.vibrate) navigator.vibrate(50);
+            // Feedback tátil
+            if (navigator.vibrate) navigator.vibrate(100);
+            
+            // Feedback visual
+            const cameraElement = type === 'product' ? DOM.productCamera : DOM.locationCamera;
+            cameraElement.style.boxShadow = `0 0 30px ${type === 'product' ? '#10b981' : '#3b82f6'}`;
+            setTimeout(() => {
+                cameraElement.style.boxShadow = 'none';
+            }, 500);
             
             if (type === 'product') {
-                state.currentProduct = value;
-                state.productScanCount++;
-                localStorage.setItem('productScanCount', state.productScanCount);
-                elements.currentProduct.textContent = value;
-                elements.productScanCount.textContent = state.productScanCount;
-                showNotification(`Produto: ${value}`, 'success');
+                appState.currentProduct = value;
+                appState.productCount++;
+                localStorage.setItem('productCount', appState.productCount);
+                DOM.productResult.textContent = value;
+                DOM.productCount.textContent = appState.productCount;
+                showNotification(`✅ Produto: ${value}`, 'success');
             } else {
-                state.currentLocation = value;
-                state.locationScanCount++;
-                localStorage.setItem('locationScanCount', state.locationScanCount);
-                elements.currentLocation.textContent = value;
-                elements.locationScanCount.textContent = state.locationScanCount;
-                showNotification(`Local: ${value}`, 'success');
+                appState.currentLocation = value;
+                appState.locationCount++;
+                localStorage.setItem('locationCount', appState.locationCount);
+                DOM.locationResult.textContent = value;
+                DOM.locationCount.textContent = appState.locationCount;
+                showNotification(`📍 Local: ${value}`, 'success');
             }
             
-            updateScanStatus();
-            setTimeout(() => stopScanner(type), 800);
-        }
-
-        function onScanError(type, error) {
-            // Ignorar erros comuns
-            if (!error.includes("No MultiFormat Readers")) {
-                console.warn(`Scanner ${type}:`, error);
-            }
+            updateStatus();
+            
+            // Parar scanner após leitura
+            setTimeout(() => {
+                stopScanner(type);
+            }, 1000);
         }
 
         // ====================
-        // CONTROLE DE QUANTIDADE
+        // STATUS DO ESCANEAMENTO
         // ====================
-        function decreaseQuantity() {
-            if (state.currentQuantity > 1) {
-                state.currentQuantity--;
-                updateQuantityDisplay();
-            }
-        }
-
-        function increaseQuantity() {
-            if (state.currentQuantity < 9999) {
-                state.currentQuantity++;
-                updateQuantityDisplay();
-            }
-        }
-
-        function updateQuantityFromInput() {
-            const value = parseInt(elements.manualQuantity.value) || 1;
-            state.currentQuantity = Math.min(Math.max(value, 1), 9999);
-            updateQuantityDisplay();
-        }
-
-        function updateQuantityDisplay() {
-            elements.quantityDisplay.textContent = state.currentQuantity;
-            elements.manualQuantity.value = state.currentQuantity;
-        }
-
-        // ====================
-        // STATUS
-        // ====================
-        function updateScanStatus() {
-            const hasProduct = state.currentProduct !== null;
-            const hasLocation = state.currentLocation !== null;
+        function updateStatus() {
+            const hasProduct = appState.currentProduct !== null;
+            const hasLocation = appState.currentLocation !== null;
             
             if (hasProduct && hasLocation) {
-                elements.scanStatus.innerHTML = '✅ <strong>PRONTO PARA SALVAR!</strong>';
-                elements.scanStatus.className = 'status-indicator status-ready';
-                elements.saveItem.disabled = false;
+                DOM.statusMessage.innerHTML = '✅ <strong>PRONTO PARA SALVAR!</strong> Produto e local escaneados.';
+                DOM.statusMessage.className = 'status-message status-ready';
+                DOM.saveItemBtn.disabled = false;
             } else if (hasProduct) {
-                elements.scanStatus.innerHTML = '⏳ Aguardando escaneamento do <strong>LOCAL</strong>';
-                elements.scanStatus.className = 'status-indicator status-waiting';
-                elements.saveItem.disabled = true;
+                DOM.statusMessage.innerHTML = '⏳ Aguardando escaneamento do <strong>LOCAL</strong>...';
+                DOM.statusMessage.className = 'status-message status-waiting';
+                DOM.saveItemBtn.disabled = true;
             } else if (hasLocation) {
-                elements.scanStatus.innerHTML = '⏳ Aguardando escaneamento do <strong>PRODUTO</strong>';
-                elements.scanStatus.className = 'status-indicator status-waiting';
-                elements.saveItem.disabled = true;
+                DOM.statusMessage.innerHTML = '⏳ Aguardando escaneamento do <strong>PRODUTO</strong>...';
+                DOM.statusMessage.className = 'status-message status-waiting';
+                DOM.saveItemBtn.disabled = true;
             } else {
-                elements.scanStatus.innerHTML = '⏳ Aguardando escaneamento...';
-                elements.scanStatus.className = 'status-indicator status-waiting';
-                elements.saveItem.disabled = true;
+                DOM.statusMessage.innerHTML = '⏳ Aguardando escaneamento de produto e local...';
+                DOM.statusMessage.className = 'status-message status-waiting';
+                DOM.saveItemBtn.disabled = true;
             }
         }
 
@@ -853,137 +1031,188 @@
         // SALVAR ITEM
         // ====================
         function saveCurrentItem() {
-            if (!state.currentProduct || !state.currentLocation) {
+            if (!appState.currentProduct || !appState.currentLocation) {
                 showNotification('Escaneie o produto e o local primeiro!', 'error');
                 return;
             }
             
-            const item = {
+            // Garantir que a quantidade está atualizada
+            appState.currentQuantity = parseInt(DOM.quantitySimple.value) || 1;
+            
+            const newItem = {
                 id: Date.now(),
-                product: state.currentProduct,
-                location: state.currentLocation,
-                quantity: state.currentQuantity,
+                product: appState.currentProduct,
+                location: appState.currentLocation,
+                quantity: appState.currentQuantity,
                 timestamp: new Date().toLocaleString('pt-BR'),
-                type: 'scanned'
+                type: 'scanned',
+                dataRegistro: new Date().toISOString()
             };
             
-            state.scannedItems.unshift(item);
-            localStorage.setItem('scannedItems', JSON.stringify(state.scannedItems));
+            appState.scannedItems.unshift(newItem);
+            localStorage.setItem('estoqueItems', JSON.stringify(appState.scannedItems));
             
-            updateTable();
-            updateTotalItems();
+            updateHistory();
+            updateStats();
             clearCurrentData();
             
-            showNotification(`Salvo: ${state.currentQuantity}x ${state.currentProduct}`, 'success');
+            showNotification(`✅ Item salvo: ${appState.currentQuantity}x ${appState.currentProduct}`, 'success');
         }
 
         function clearCurrentData() {
-            state.currentProduct = null;
-            state.currentLocation = null;
-            state.currentQuantity = 1;
+            appState.currentProduct = null;
+            appState.currentLocation = null;
+            appState.currentQuantity = 1;
             
-            elements.currentProduct.textContent = 'Nenhum produto escaneado';
-            elements.currentLocation.textContent = 'Nenhum local escaneado';
+            DOM.productResult.textContent = 'Nenhum produto escaneado';
+            DOM.locationResult.textContent = 'Nenhum local escaneado';
+            DOM.quantitySimple.value = '1';
             
-            updateQuantityDisplay();
-            updateScanStatus();
+            updateStatus();
         }
 
         // ====================
-        // ADICIONAR MANUALMENTE
+        // ADIÇÃO MANUAL
         // ====================
-        function addManualEntry() {
-            const product = prompt('Código do Produto:');
+        function addManualItem() {
+            const product = prompt('Digite o código do produto:');
             if (!product) return;
             
-            const location = prompt('Local:');
+            const location = prompt('Digite o local:');
             if (!location) return;
             
-            const quantityStr = prompt('Quantidade:', '1');
-            const quantity = parseInt(quantityStr) || 1;
+            const quantityStr = prompt('Digite a quantidade:', '1');
+            const quantity = parseInt(quantityStr.replace(/[^0-9]/g, '')) || 1;
             
-            const item = {
+            const newItem = {
                 id: Date.now(),
                 product: product.trim(),
                 location: location.trim(),
                 quantity: quantity,
                 timestamp: new Date().toLocaleString('pt-BR'),
-                type: 'manual'
+                type: 'manual',
+                dataRegistro: new Date().toISOString()
             };
             
-            state.scannedItems.unshift(item);
-            localStorage.setItem('scannedItems', JSON.stringify(state.scannedItems));
+            appState.scannedItems.unshift(newItem);
+            localStorage.setItem('estoqueItems', JSON.stringify(appState.scannedItems));
             
-            updateTable();
-            updateTotalItems();
-            showNotification(`Manual: ${quantity}x ${product}`, 'success');
+            updateHistory();
+            updateStats();
+            showNotification(`✅ Item manual: ${quantity}x ${product}`, 'success');
         }
 
         // ====================
-        // EXPORTAR CSV
+        // NOVA FUNÇÃO: EXPORTAR PARA EXCEL (.XLSX)
         // ====================
-        function exportToCSV() {
-            if (state.scannedItems.length === 0) {
+        function exportToExcel() {
+            if (appState.scannedItems.length === 0) {
                 showNotification('Nenhum dado para exportar!', 'error');
                 return;
             }
             
-            const headers = ['Produto', 'Local', 'Quantidade', 'Data/Hora', 'Tipo'];
-            const csvData = state.scannedItems.map(item => [
-                `"${item.product}"`,
-                `"${item.location}"`,
-                item.quantity,
-                `"${item.timestamp}"`,
-                item.type === 'scanned' ? 'Escaneado' : 'Manual'
-            ]);
-            
-            const csvContent = [
-                headers.join(','),
-                ...csvData.map(row => row.join(','))
-            ].join('\n');
-            
-            // Criar blob
-            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            
-            link.href = url;
-            link.download = `estoque_${new Date().getTime()}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showNotification('CSV exportado!', 'success');
+            try {
+                // Preparar dados para Excel
+                const excelData = appState.scannedItems.map((item, index) => ({
+                    'ID': item.id,
+                    'Produto': item.product,
+                    'Local': item.location,
+                    'Quantidade': item.quantity,
+                    'Data': item.timestamp.split(' ')[0],
+                    'Hora': item.timestamp.split(' ')[1],
+                    'Tipo': item.type === 'scanned' ? 'Escaneado' : 'Manual',
+                    'Data Completa': item.timestamp
+                }));
+                
+                // Criar worksheet
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                
+                // Ajustar largura das colunas
+                const wscols = [
+                    { wch: 15 }, // ID
+                    { wch: 25 }, // Produto
+                    { wch: 25 }, // Local
+                    { wch: 12 }, // Quantidade
+                    { wch: 12 }, // Data
+                    { wch: 10 }, // Hora
+                    { wch: 12 }, // Tipo
+                    { wch: 20 }  // Data Completa
+                ];
+                ws['!cols'] = wscols;
+                
+                // Adicionar cabeçalho com estilo
+                const range = XLSX.utils.decode_range(ws['!ref']);
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const address = XLSX.utils.encode_col(C) + "1";
+                    if (!ws[address]) continue;
+                    ws[address].s = {
+                        font: { bold: true, color: { rgb: "FFFFFF" } },
+                        fill: { fgColor: { rgb: "1A2980" } },
+                        alignment: { horizontal: "center" }
+                    };
+                }
+                
+                // Criar workbook
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Estoque");
+                
+                // Adicionar uma segunda sheet com totais
+                const totalsData = [{
+                    'Total de Itens': appState.scannedItems.length,
+                    'Quantidade Total': appState.scannedItems.reduce((sum, item) => sum + item.quantity, 0),
+                    'Data da Exportação': new Date().toLocaleString('pt-BR'),
+                    'Itens Escaneados': appState.scannedItems.filter(item => item.type === 'scanned').length,
+                    'Itens Manuais': appState.scannedItems.filter(item => item.type === 'manual').length
+                }];
+                
+                const ws2 = XLSX.utils.json_to_sheet(totalsData);
+                XLSX.utils.book_append_sheet(wb, ws2, "Resumo");
+                
+                // Gerar nome do arquivo
+                const fileName = `estoque_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}_${new Date().getTime()}.xlsx`;
+                
+                // Salvar arquivo
+                XLSX.writeFile(wb, fileName);
+                
+                showNotification('📊 Excel (.XLSX) exportado com sucesso!', 'success');
+                
+            } catch (error) {
+                console.error('Erro ao exportar Excel:', error);
+                showNotification('Erro ao exportar Excel. Tente novamente.', 'error');
+            }
         }
 
         // ====================
-        // ATUALIZAR TABELA
+        // HISTÓRICO
         // ====================
-        function updateTable() {
-            const tbody = elements.tableBody;
+        function updateHistory() {
+            const tbody = DOM.historyBody;
             
-            if (state.scannedItems.length === 0) {
+            if (appState.scannedItems.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" class="no-data">
-                            Nenhum item adicionado ainda
+                        <td colspan="6" class="empty-state">
+                            Nenhum item adicionado ainda. Comece escaneando!
                         </td>
                     </tr>
                 `;
                 return;
             }
             
-            tbody.innerHTML = state.scannedItems.map(item => `
+            tbody.innerHTML = appState.scannedItems.map(item => `
                 <tr>
                     <td><strong>${item.product}</strong></td>
                     <td>${item.location}</td>
-                    <td><strong>${item.quantity}</strong></td>
+                    <td><strong style="color: #1a2980; font-size: 1.1rem;">${item.quantity}</strong></td>
                     <td>
                         <div>${item.timestamp}</div>
-                        <span class="badge-scan">${item.type === 'scanned' ? '📱 Escaneado' : '✏️ Manual'}</span>
+                        <span class="badge ${item.type === 'scanned' ? 'badge-scanned' : 'badge-manual'}">
+                            ${item.type === 'scanned' ? '📱 Escaneado' : '✏️ Manual'}
+                        </span>
                     </td>
+                    <td>${item.type === 'scanned' ? 'Escaneado' : 'Manual'}</td>
                     <td>
-                        <button onclick="deleteItem(${item.id})" class="delete-btn">
+                        <button onclick="deleteItem(${item.id})" class="delete-action">
                             Excluir
                         </button>
                     </td>
@@ -991,67 +1220,74 @@
             `).join('');
         }
 
-        // ====================
-        // EXCLUIR ITEM
-        // ====================
         window.deleteItem = function(id) {
-            if (confirm('Excluir este item?')) {
-                state.scannedItems = state.scannedItems.filter(item => item.id !== id);
-                localStorage.setItem('scannedItems', JSON.stringify(state.scannedItems));
+            if (confirm('Tem certeza que deseja excluir este item?')) {
+                appState.scannedItems = appState.scannedItems.filter(item => item.id !== id);
+                localStorage.setItem('estoqueItems', JSON.stringify(appState.scannedItems));
                 
-                updateTable();
-                updateTotalItems();
-                showNotification('Item excluído!', 'info');
+                updateHistory();
+                updateStats();
+                showNotification('🗑️ Item excluído do histórico', 'info');
             }
         };
 
         // ====================
-        // ATUALIZAR UI
+        // ESTATÍSTICAS
         // ====================
-        function updateTotalItems() {
-            elements.totalItems.textContent = state.scannedItems.length;
-            elements.lastUpdate.textContent = new Date().toLocaleTimeString('pt-BR', {
+        function updateStats() {
+            DOM.totalItems.textContent = appState.scannedItems.length;
+            
+            const totalQty = appState.scannedItems.reduce((sum, item) => sum + item.quantity, 0);
+            DOM.totalQuantity.textContent = totalQty.toLocaleString('pt-BR');
+            
+            DOM.lastUpdate.textContent = new Date().toLocaleTimeString('pt-BR', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
         }
 
         function updateCounters() {
-            elements.productScanCount.textContent = state.productScanCount;
-            elements.locationScanCount.textContent = state.locationScanCount;
+            DOM.productCount.textContent = appState.productCount;
+            DOM.locationCount.textContent = appState.locationCount;
         }
 
+        // ====================
+        // ATUALIZAR UI
+        // ====================
         function updateUI() {
-            updateQuantityDisplay();
-            updateScanStatus();
-            updateTable();
-            updateTotalItems();
+            updateStatus();
+            updateHistory();
+            updateStats();
             updateCounters();
         }
 
         // ====================
-        // NOTIFICAÇÃO SIMPLES
+        // NOTIFICAÇÕES
         // ====================
         function showNotification(message, type = 'info') {
-            const notification = elements.notification;
+            const notification = DOM.notification;
             notification.textContent = message;
-            notification.className = `simple-notification ${type}`;
+            notification.className = `notification notification-${type}`;
             notification.style.display = 'flex';
             
             setTimeout(() => {
                 notification.style.display = 'none';
-            }, 2000);
+            }, 3000);
         }
 
         // ====================
-        // PREVENIR FECHAMENTO
+        // LIMPEZA
         // ====================
         window.addEventListener('beforeunload', () => {
-            if (state.isProductScanning) state.productScanner.stop().catch(() => {});
-            if (state.isLocationScanning) state.locationScanner.stop().catch(() => {});
+            if (appState.isProductScanning) {
+                appState.productScanner.stop().catch(() => {});
+            }
+            if (appState.isLocationScanning) {
+                appState.locationScanner.stop().catch(() => {});
+            }
         });
 
-        // Configurar eventos touch
+        // Melhorar UX em dispositivos touch
         document.addEventListener('touchstart', () => {}, { passive: true });
     </script>
 </body>
