@@ -365,13 +365,53 @@
             gap: 12px;
         }
 
+        /* MELHORIA: Scroll horizontal para tabela no mobile */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        /* Indicador visual de scroll (para mobile) */
+        .table-wrapper::after {
+            content: '← →';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(26, 41, 128, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            opacity: 0.7;
+            pointer-events: none;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .table-wrapper::after {
+                display: block;
+                animation: fadeInOut 3s ease-in-out infinite;
+            }
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.9; }
+        }
+
         .history-table {
             width: 100%;
+            min-width: 650px; /* Força o scroll horizontal quando necessário */
             border-collapse: collapse;
             background: white;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
 
         .history-table th {
@@ -381,12 +421,17 @@
             text-align: left;
             font-weight: 600;
             font-size: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap; /* Impede quebra de linha nos cabeçalhos */
         }
 
         .history-table td {
             padding: 16px;
             border-bottom: 2px solid #f1f5f9;
             vertical-align: middle;
+            white-space: nowrap; /* Mantém conteúdo em uma linha */
         }
 
         .history-table tr:last-child td {
@@ -403,6 +448,7 @@
             font-size: 0.8rem;
             font-weight: 600;
             display: inline-block;
+            white-space: nowrap;
         }
 
         .badge-scanned {
@@ -424,6 +470,7 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .delete-action:hover {
@@ -550,6 +597,46 @@
                 font-size: 0.9rem;
                 padding: 10px 16px;
             }
+            
+            /* Ajustes específicos para mobile Android Chrome */
+            .history-table th,
+            .history-table td {
+                padding: 14px 12px;
+                font-size: 0.95rem;
+            }
+            
+            .delete-action {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .badge {
+                padding: 4px 10px;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Melhorias para touch no Chrome Android */
+        @media (hover: none) and (pointer: coarse) {
+            .btn {
+                min-height: 50px;
+                padding: 14px;
+            }
+            
+            .quantity-input-simple {
+                font-size: 1.6rem;
+                padding: 18px;
+                min-height: 60px;
+            }
+            
+            /* Aumenta área de toque para botões pequenos */
+            .delete-action {
+                min-width: 70px;
+                min-height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -652,7 +739,6 @@
                         id="quantitySimple" 
                         class="quantity-input-simple"
                         placeholder="0"
-                        value="1"
                         min="1"
                         step="1"
                         inputmode="numeric"
@@ -693,6 +779,7 @@
                 <span>📋</span> Histórico de Itens
             </h3>
             
+            <!-- MELHORIA: Container com scroll horizontal -->
             <div class="table-wrapper">
                 <table class="history-table">
                     <thead>
@@ -787,7 +874,7 @@
             saveItemBtn: document.getElementById('saveItemBtn'),
             clearDataBtn: document.getElementById('clearDataBtn'),
             addManualBtn: document.getElementById('addManualBtn'),
-            exportExcelBtn: document.getElementById('exportExcelBtn'), // MUDADO
+            exportExcelBtn: document.getElementById('exportExcelBtn'),
             
             // Histórico
             historyBody: document.getElementById('historyBody'),
@@ -805,6 +892,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 Scanner Estoque - GitHub Pages');
             console.log('📊 Exportação Excel (.XLSX) habilitada');
+            console.log('📱 Modo mobile otimizado para Android Chrome');
             
             initApp();
             setupEventListeners();
@@ -821,7 +909,7 @@
             appState.productScanner = new Html5Qrcode("productCamera");
             appState.locationScanner = new Html5Qrcode("locationCamera");
             
-            // Configurar input de quantidade
+            // Configurar input de quantidade (agora vazio por padrão)
             setupQuantityInput();
             
             // Atualizar contadores
@@ -830,13 +918,21 @@
         }
 
         function setupQuantityInput() {
-            // Permitir apenas números e sem limites rígidos
+            // REMOVIDO: Não definir valor padrão "1"
+            
             DOM.quantitySimple.addEventListener('input', function(e) {
                 // Remover caracteres não numéricos
                 let value = this.value.replace(/[^0-9]/g, '');
                 
-                // Se estiver vazio, definir como 1
-                if (value === '' || value === '0') {
+                // Se estiver vazio, manter vazio (não definir como 1)
+                if (value === '') {
+                    this.value = '';
+                    appState.currentQuantity = 1; // Mantém 1 como padrão interno
+                    return;
+                }
+                
+                // Se for "0", definir como "1"
+                if (value === '0') {
                     value = '1';
                 }
                 
@@ -854,9 +950,14 @@
                 e.preventDefault();
                 const pastedData = e.clipboardData.getData('text');
                 const numbers = pastedData.replace(/[^0-9]/g, '');
-                this.value = numbers || '1';
+                this.value = numbers; // Mantém vazio se não houver números
                 appState.currentQuantity = parseInt(numbers) || 1;
             });
+            
+            // Foco no campo de quantidade quando a página carrega
+            setTimeout(() => {
+                DOM.quantitySimple.focus();
+            }, 1000);
         }
 
         function setupEventListeners() {
@@ -870,7 +971,44 @@
             DOM.saveItemBtn.addEventListener('click', saveCurrentItem);
             DOM.clearDataBtn.addEventListener('click', clearCurrentData);
             DOM.addManualBtn.addEventListener('click', addManualItem);
-            DOM.exportExcelBtn.addEventListener('click', exportToExcel); // MUDADO
+            DOM.exportExcelBtn.addEventListener('click', exportToExcel);
+            
+            // MELHORIA: Permitir scroll horizontal com gestos de toque
+            setupTouchScrolling();
+        }
+
+        // ====================
+        // MELHORIA: Scroll horizontal com toque
+        // ====================
+        function setupTouchScrolling() {
+            const tableWrapper = document.querySelector('.table-wrapper');
+            if (!tableWrapper) return;
+            
+            let isScrolling = false;
+            let startX, scrollLeft;
+            
+            tableWrapper.addEventListener('touchstart', (e) => {
+                isScrolling = true;
+                startX = e.touches[0].pageX - tableWrapper.offsetLeft;
+                scrollLeft = tableWrapper.scrollLeft;
+                tableWrapper.style.cursor = 'grabbing';
+            });
+            
+            tableWrapper.addEventListener('touchmove', (e) => {
+                if (!isScrolling) return;
+                e.preventDefault();
+                const x = e.touches[0].pageX - tableWrapper.offsetLeft;
+                const walk = (x - startX) * 2; // Velocidade do scroll
+                tableWrapper.scrollLeft = scrollLeft - walk;
+            });
+            
+            tableWrapper.addEventListener('touchend', () => {
+                isScrolling = false;
+                tableWrapper.style.cursor = 'grab';
+            });
+            
+            // Adiciona cursor de "arrastar" para desktop (mesmo que seja mobile)
+            tableWrapper.style.cursor = 'grab';
         }
 
         // ====================
@@ -967,7 +1105,7 @@
         function handleScanSuccess(type, decodedText) {
             const value = decodedText.trim();
             
-            // Feedback tátil
+            // Feedback tátil (Android Chrome suporta)
             if (navigator.vibrate) navigator.vibrate(100);
             
             // Feedback visual
@@ -1036,8 +1174,9 @@
                 return;
             }
             
-            // Garantir que a quantidade está atualizada
-            appState.currentQuantity = parseInt(DOM.quantitySimple.value) || 1;
+            // Atualizar quantidade do campo (se estiver vazio, usar 1)
+            const quantityValue = DOM.quantitySimple.value;
+            appState.currentQuantity = quantityValue === '' ? 1 : parseInt(quantityValue) || 1;
             
             const newItem = {
                 id: Date.now(),
@@ -1066,9 +1205,14 @@
             
             DOM.productResult.textContent = 'Nenhum produto escaneado';
             DOM.locationResult.textContent = 'Nenhum local escaneado';
-            DOM.quantitySimple.value = '1';
+            DOM.quantitySimple.value = ''; // MELHORIA: Limpar campo em vez de definir como "1"
             
             updateStatus();
+            
+            // Focar no campo de quantidade após limpar
+            setTimeout(() => {
+                DOM.quantitySimple.focus();
+            }, 100);
         }
 
         // ====================
@@ -1081,8 +1225,8 @@
             const location = prompt('Digite o local:');
             if (!location) return;
             
-            const quantityStr = prompt('Digite a quantidade:', '1');
-            const quantity = parseInt(quantityStr.replace(/[^0-9]/g, '')) || 1;
+            const quantityStr = prompt('Digite a quantidade:', '');
+            const quantity = quantityStr === '' ? 1 : parseInt(quantityStr.replace(/[^0-9]/g, '')) || 1;
             
             const newItem = {
                 id: Date.now(),
