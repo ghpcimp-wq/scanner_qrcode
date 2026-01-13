@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>📦 Scanner Estoque</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #1e3c72;
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 20px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        header {
+            background: #1e3c72;
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            border-bottom: 3px solid #2a5298;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .scanning-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px;
+            background: #f5f7fa;
+            flex: 1;
+        }
+
+        .scanner-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-top: 4px solid;
+        }
+
+        .scanner-card.product {
+            border-color: #00ff88;
+        }
+
+        .scanner-card.location {
+            border-color: #0088ff;
+        }
+
+        .scanner-card.quantity {
+            border-color: #ff6b6b;
+        }
+
+        .scanner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .scanner-header h2 {
+            color: #1e3c72;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.3rem;
+        }
+
+        .scan-counter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: #1e3c72;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .scanner-area {
+            width: 100%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            min-height: 200px;
+            position: relative;
+            border: 2px solid #ddd;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            border: 3px solid;
+            border-radius: 10px;
+            box-shadow: 0 0 0 1000px rgba(0,0,0,0.7);
+            z-index: 100;
+        }
+
+        .overlay-product {
+            border-color: #00ff88;
+        }
+
+        .overlay-location {
+            border-color: #0088ff;
+        }
+
+        .scanned-value {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            border-left: 4px solid #1e3c72;
+        }
+
+        .scanned-value h4 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .scanned-value p {
+            color: #1e3c72;
+            font-size: 1.2rem;
+            font-weight: bold;
+            word-break: break-all;
+            min-height: 24px;
+        }
+
+        .scanner-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background: #1e3c72;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .qty-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1e3c72;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .qty-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .qty-btn:active {
+            transform: scale(0.9);
+        }
+
+        .qty-minus {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .qty-plus {
+            background: #1e3c72;
+            color: white;
+        }
+
+        .qty-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .qty-input:focus {
+            border-color: #1e3c72;
+            outline: none;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 15px 0;
+            text-align: center;
+            min-height: 50px;
+        }
+
+        .status-ready {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #155724;
+        }
+
+        .status-waiting {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #856404;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 15px;
+            background: #f5f7fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .data-section {
+            padding: 15px;
+            background: white;
+        }
+
+        .data-section h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            min-width: 600px;
+        }
+
+        th {
+            background: #1e3c72;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge-scan {
+            background: #e3f2fd;
+            color: #0d47a1;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .delete-btn:active {
+            transform: scale(0.95);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+            font-style: italic;
+            font-size: 1rem;
+            background: #f8f9fa;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #666;
+            font-size: 0.85rem;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        .simple-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .simple-notification.success {
+            background: #28a745;
+        }
+
+        .simple-notification.error {
+            background: #dc3545;
+        }
+
+        .simple-notification.info {
+            background: #1e3c72;
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translateX(-50%) translateY(-20px); 
+                opacity: 0;
+            }
+            to { 
+                transform: translateX(-50%) translateY(0); 
+                opacity: 1;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 700px;
+                margin: 20px auto;
+            }
+            
+            .scanning-panel {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            
+            .scanner-card.quantity {
+                grid-column: span 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📦 Scanner Estoque</h1>
+            <p>Escaneie produto → local → defina quantidade → salve</p>
+        </header>
+
+        <div class="scanning-panel">
+            <!-- Scanner de Produto -->
+            <div class="scanner-card product">
+                <div class="scanner-header">
+                    <h2><span style="color: #00ff88;">📦</span> Produto</h2>
+                    <div class="scan-counter" id="productScanCount">0</div>
+                </div>
+                
+                <div class="scanner-area" id="productScanner">
+                    <div class="scanner-overlay overlay-product"></div>
+                </div>
+                
+                <div class="scanned-value">
+                    <h4>Código do Produto:</h4>
+                    <p id="currentProduct">Nenhum produto escaneado</p>
+                </div>
+                
+                <div class="scanner-controls">
+                    <button id="startProductScanner" class="btn btn-primary">
+                        ▶ Iniciar
+                    </button>
+                    <button id="stopProductScanner" class="btn btn-secondary" disabled>
+                        ⏹ Parar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scanner de Local -->
+            <div class="scanner-card location">
+                <div class="scanner-header">
+                    <h2><span style="color: #0088ff;">📍</span> Local</h2>
+                    <div class="scan-counter" id="locationScanCount">0</div>
+                </div>
+                
+                <div class="scanner-area" id="locationScanner">
+                    <div class="scanner-overlay overlay-location"></div>
+                </div>
+                
+                <div class="scanned-value">
+                    <h4>Local Escaneado:</h4>
+                    <p id="currentLocation">Nenhum local escaneado</p>
+                </div>
+                
+                <div class="scanner-controls">
+                    <button id="startLocationScanner" class="btn btn-primary">
+                        ▶ Iniciar
+                    </button>
+                    <button id="stopLocationScanner" class="btn btn-secondary" disabled>
+                        ⏹ Parar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controle de Quantidade -->
+            <div class="scanner-card quantity">
+                <div class="scanner-header">
+                    <h2><span style="color: #ff6b6b;">🔢</span> Quantidade</h2>
+                </div>
+                
+                <div class="quantity-controls">
+                    <button id="decreaseQty" class="qty-btn qty-minus">-</button>
+                    <div class="qty-display" id="quantityDisplay">1</div>
+                    <button id="increaseQty" class="qty-btn qty-plus">+</button>
+                </div>
+                
+                <input type="number" id="manualQuantity" class="qty-input" 
+                       placeholder="Ou digite a quantidade" min="1" max="9999" value="1">
+                
+                <div class="status-indicator" id="scanStatus">
+                    ⏳ Aguardando escaneamento...
+                </div>
+                
+                <div class="scanner-controls">
+                    <button id="saveItem" class="btn btn-success" disabled>
+                        💾 Salvar Item
+                    </button>
+                    <button id="clearCurrent" class="btn btn-warning">
+                        🗑️ Limpar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <button id="addManualEntry" class="btn btn-primary">
+                ✏️ Adicionar Manual
+            </button>
+            <button id="exportData" class="btn btn-success">
+                📥 Exportar CSV
+            </button>
+        </div>
+
+        <div class="data-section">
+            <h3>📊 Histórico de Itens</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Local</th>
+                            <th>Qtd</th>
+                            <th>Data/Hora</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="5" class="no-data">
+                                Nenhum item adicionado ainda
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p>Itens: <strong id="totalItems">0</strong> | Última atualização: <strong id="lastUpdate">-</strong></p>
+            <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Página web - Funciona no Chrome Android</p>
+        </footer>
+    </div>
+
+    <!-- Notificação Simples -->
+    <div id="notification" class="simple-notification" style="display: none;"></div>
+
+    <script>
+        // ====================
+        // ESTADO DO SISTEMA
+        // ====================
+        const state = {
+            currentProduct: null,
+            currentLocation: null,
+            currentQuantity: 1,
+            productScanner: null,
+            locationScanner: null,
+            isProductScanning: false,
+            isLocationScanning: false,
+            scannedItems: JSON.parse(localStorage.getItem('scannedItems')) || [],
+            productScanCount: parseInt(localStorage.getItem('productScanCount')) || 0,
+            locationScanCount: parseInt(localStorage.getItem('locationScanCount')) || 0
+        };
+
+        // ====================
+        // ELEMENTOS DOM
+        // ====================
+        const elements = {
+            // Scanners
+            productScanner: document.getElementById('productScanner'),
+            locationScanner: document.getElementById('locationScanner'),
+            startProductScanner: document.getElementById('startProductScanner'),
+            stopProductScanner: document.getElementById('stopProductScanner'),
+            startLocationScanner: document.getElementById('startLocationScanner'),
+            stopLocationScanner: document.getElementById('stopLocationScanner'),
+            productScanCount: document.getElementById('productScanCount'),
+            locationScanCount: document.getElementById('locationScanCount'),
+            currentProduct: document.getElementById('currentProduct'),
+            currentLocation: document.getElementById('currentLocation'),
+            
+            // Quantidade
+            quantityDisplay: document.getElementById('quantityDisplay'),
+            manualQuantity: document.getElementById('manualQuantity'),
+            decreaseQty: document.getElementById('decreaseQty'),
+            increaseQty: document.getElementById('increaseQty'),
+            
+            // Status e ações
+            scanStatus: document.getElementById('scanStatus'),
+            saveItem: document.getElementById('saveItem'),
+            clearCurrent: document.getElementById('clearCurrent'),
+            addManualEntry: document.getElementById('addManualEntry'),
+            exportData: document.getElementById('exportData'),
+            
+            // Tabela
+            tableBody: document.getElementById('tableBody'),
+            totalItems: document.getElementById('totalItems'),
+            lastUpdate: document.getElementById('lastUpdate'),
+            
+            // Notificação
+            notification: document.getElementById('notification')
+        };
+
+        // ====================
+        // INICIALIZAÇÃO
+        // ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Scanner Estoque - Página Web');
+            initScanners();
+            setupEventListeners();
+            updateUI();
+            updateScanStatus();
+            updateCounters();
+            
+            // Mostrar mensagem inicial
+            setTimeout(() => {
+                showNotification('Pronto para escanear!', 'info');
+            }, 500);
+        });
+
+        // ====================
+        // FUNÇÕES DO SCANNER
+        // ====================
+        function initScanners() {
+            try {
+                state.productScanner = new Html5Qrcode("productScanner");
+                state.locationScanner = new Html5Qrcode("locationScanner");
+                console.log('Scanners prontos');
+            } catch (error) {
+                console.error('Erro nos scanners:', error);
+                showNotification('Erro ao iniciar scanners', 'error');
+            }
+        }
+
+        function setupEventListeners() {
+            // Scanners
+            elements.startProductScanner.addEventListener('click', () => startScanner('product'));
+            elements.stopProductScanner.addEventListener('click', () => stopScanner('product'));
+            elements.startLocationScanner.addEventListener('click', () => startScanner('location'));
+            elements.stopLocationScanner.addEventListener('click', () => stopScanner('location'));
+            
+            // Quantidade
+            elements.decreaseQty.addEventListener('click', decreaseQuantity);
+            elements.increaseQty.addEventListener('click', increaseQuantity);
+            elements.manualQuantity.addEventListener('input', updateQuantityFromInput);
+            
+            // Ações
+            elements.saveItem.addEventListener('click', saveCurrentItem);
+            elements.clearCurrent.addEventListener('click', clearCurrentData);
+            elements.addManualEntry.addEventListener('click', addManualEntry);
+            elements.exportData.addEventListener('click', exportToCSV);
+        }
+
+        async function startScanner(type) {
+            if ((type === 'product' && state.isProductScanning) || 
+                (type === 'location' && state.isLocationScanning)) {
+                return;
+            }
+            
+            try {
+                const cameras = await Html5Qrcode.getCameras();
+                if (cameras.length === 0) {
+                    showNotification('Nenhuma câmera encontrada!', 'error');
+                    return;
+                }
+                
+                const cameraId = cameras.find(c => c.label.toLowerCase().includes('back'))?.id || cameras[0].id;
+                const scanner = type === 'product' ? state.productScanner : state.locationScanner;
+                
+                await scanner.start(
+                    cameraId,
+                    {
+                        fps: 10,
+                        qrbox: { width: 180, height: 180 },
+                        aspectRatio: 1.0
+                    },
+                    (decodedText) => onScanSuccess(type, decodedText),
+                    (error) => onScanError(type, error)
+                );
+                
+                if (type === 'product') {
+                    state.isProductScanning = true;
+                    elements.startProductScanner.disabled = true;
+                    elements.stopProductScanner.disabled = false;
+                } else {
+                    state.isLocationScanning = true;
+                    elements.startLocationScanner.disabled = true;
+                    elements.stopLocationScanner.disabled = false;
+                }
+                
+                showNotification(`Scanner ${type === 'product' ? 'Produto' : 'Local'} iniciado`, 'info');
+            } catch (error) {
+                console.error(`Erro scanner ${type}:`, error);
+                showNotification('Erro ao acessar câmera', 'error');
+            }
+        }
+
+        function stopScanner(type) {
+            const scanner = type === 'product' ? state.productScanner : state.locationScanner;
+            const isScanning = type === 'product' ? state.isProductScanning : state.isLocationScanning;
+            
+            if (!isScanning) return;
+            
+            scanner.stop().then(() => {
+                if (type === 'product') {
+                    state.isProductScanning = false;
+                    elements.startProductScanner.disabled = false;
+                    elements.stopProductScanner.disabled = true;
+                } else {
+                    state.isLocationScanning = false;
+                    elements.startLocationScanner.disabled = false;
+                    elements.stopLocationScanner.disabled = true;
+                }
+            }).catch(console.error);
+        }
+
+        function onScanSuccess(type, decodedText) {
+            const value = decodedText.trim();
+            
+            // Vibrar (se suportado)
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            if (type === 'product') {
+                state.currentProduct = value;
+                state.productScanCount++;
+                localStorage.setItem('productScanCount', state.productScanCount);
+                elements.currentProduct.textContent = value;
+                elements.productScanCount.textContent = state.productScanCount;
+                showNotification(`Produto: ${value}`, 'success');
+            } else {
+                state.currentLocation = value;
+                state.locationScanCount++;
+                localStorage.setItem('locationScanCount', state.locationScanCount);
+                elements.currentLocation.textContent = value;
+                elements.locationScanCount.textContent = state.locationScanCount;
+                showNotification(`Local: ${value}`, 'success');
+            }
+            
+            updateScanStatus();
+            setTimeout(() => stopScanner(type), 800);
+        }
+
+        function onScanError(type, error) {
+            // Ignorar erros comuns
+            if (!error.includes("No MultiFormat Readers")) {
+                console.warn(`Scanner ${type}:`, error);
+            }
+        }
+
+        // ====================
+        // CONTROLE DE QUANTIDADE
+        // ====================
+        function decreaseQuantity() {
+            if (state.currentQuantity > 1) {
+                state.currentQuantity--;
+                updateQuantityDisplay();
+            }
+        }
+
+        function increaseQuantity() {
+            if (state.currentQuantity < 9999) {
+                state.currentQuantity++;
+                updateQuantityDisplay();
+            }
+        }
+
+        function updateQuantityFromInput() {
+            const value = parseInt(elements.manualQuantity.value) || 1;
+            state.currentQuantity = Math.min(Math.max(value, 1), 9999);
+            updateQuantityDisplay();
+        }
+
+        function updateQuantityDisplay() {
+            elements.quantityDisplay.textContent = state.currentQuantity;
+            elements.manualQuantity.value = state.currentQuantity;
+        }
+
+        // ====================
+        // STATUS
+        // ====================
+        function updateScanStatus() {
+            const hasProduct = state.currentProduct !== null;
+            const hasLocation = state.currentLocation !== null;
+            
+            if (hasProduct && hasLocation) {
+                elements.scanStatus.innerHTML = '✅ <strong>PRONTO PARA SALVAR!</strong>';
+                elements.scanStatus.className = 'status-indicator status-ready';
+                elements.saveItem.disabled = false;
+            } else if (hasProduct) {
+                elements.scanStatus.innerHTML = '⏳ Aguardando escaneamento do <strong>LOCAL</strong>';
+                elements.scanStatus.className = 'status-indicator status-waiting';
+                elements.saveItem.disabled = true;
+            } else if (hasLocation) {
+                elements.scanStatus.innerHTML = '⏳ Aguardando escaneamento do <strong>PRODUTO</strong>';
+                elements.scanStatus.className = 'status-indicator status-waiting';
+                elements.saveItem.disabled = true;
+            } else {
+                elements.scanStatus.innerHTML = '⏳ Aguardando escaneamento...';
+                elements.scanStatus.className = 'status-indicator status-waiting';
+                elements.saveItem.disabled = true;
+            }
+        }
+
+        // ====================
+        // SALVAR ITEM
+        // ====================
+        function saveCurrentItem() {
+            if (!state.currentProduct || !state.currentLocation) {
+                showNotification('Escaneie o produto e o local primeiro!', 'error');
+                return;
+            }
+            
+            const item = {
+                id: Date.now(),
+                product: state.currentProduct,
+                location: state.currentLocation,
+                quantity: state.currentQuantity,
+                timestamp: new Date().toLocaleString('pt-BR'),
+                type: 'scanned'
+            };
+            
+            state.scannedItems.unshift(item);
+            localStorage.setItem('scannedItems', JSON.stringify(state.scannedItems));
+            
+            updateTable();
+            updateTotalItems();
+            clearCurrentData();
+            
+            showNotification(`Salvo: ${state.currentQuantity}x ${state.currentProduct}`, 'success');
+        }
+
+        function clearCurrentData() {
+            state.currentProduct = null;
+            state.currentLocation = null;
+            state.currentQuantity = 1;
+            
+            elements.currentProduct.textContent = 'Nenhum produto escaneado';
+            elements.currentLocation.textContent = 'Nenhum local escaneado';
+            
+            updateQuantityDisplay();
+            updateScanStatus();
+        }
+
+        // ====================
+        // ADICIONAR MANUALMENTE
+        // ====================
+        function addManualEntry() {
+            const product = prompt('Código do Produto:');
+            if (!product) return;
+            
+            const location = prompt('Local:');
+            if (!location) return;
+            
+            const quantityStr = prompt('Quantidade:', '1');
+            const quantity = parseInt(quantityStr) || 1;
+            
+            const item = {
+                id: Date.now(),
+                product: product.trim(),
+                location: location.trim(),
+                quantity: quantity,
+                timestamp: new Date().toLocaleString('pt-BR'),
+                type: 'manual'
+            };
+            
+            state.scannedItems.unshift(item);
+            localStorage.setItem('scannedItems', JSON.stringify(state.scannedItems));
+            
+            updateTable();
+            updateTotalItems();
+            showNotification(`Manual: ${quantity}x ${product}`, 'success');
+        }
+
+        // ====================
+        // EXPORTAR CSV
+        // ====================
+        function exportToCSV() {
+            if (state.scannedItems.length === 0) {
+                showNotification('Nenhum dado para exportar!', 'error');
+                return;
+            }
+            
+            const headers = ['Produto', 'Local', 'Quantidade', 'Data/Hora', 'Tipo'];
+            const csvData = state.scannedItems.map(item => [
+                `"${item.product}"`,
+                `"${item.location}"`,
+                item.quantity,
+                `"${item.timestamp}"`,
+                item.type === 'scanned' ? 'Escaneado' : 'Manual'
+            ]);
+            
+            const csvContent = [
+                headers.join(','),
+                ...csvData.map(row => row.join(','))
+            ].join('\n');
+            
+            // Criar blob
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = `estoque_${new Date().getTime()}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('CSV exportado!', 'success');
+        }
+
+        // ====================
+        // ATUALIZAR TABELA
+        // ====================
+        function updateTable() {
+            const tbody = elements.tableBody;
+            
+            if (state.scannedItems.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="no-data">
+                            Nenhum item adicionado ainda
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = state.scannedItems.map(item => `
+                <tr>
+                    <td><strong>${item.product}</strong></td>
+                    <td>${item.location}</td>
+                    <td><strong>${item.quantity}</strong></td>
+                    <td>
+                        <div>${item.timestamp}</div>
+                        <span class="badge-scan">${item.type === 'scanned' ? '📱 Escaneado' : '✏️ Manual'}</span>
+                    </td>
+                    <td>
+                        <button onclick="deleteItem(${item.id})" class="delete-btn">
+                            Excluir
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ====================
+        // EXCLUIR ITEM
+        // ====================
+        window.deleteItem = function(id) {
+            if (confirm('Excluir este item?')) {
+                state.scannedItems = state.scannedItems.filter(item => item.id !== id);
+                localStorage.setItem('scannedItems', JSON.stringify(state.scannedItems));
+                
+                updateTable();
+                updateTotalItems();
+                showNotification('Item excluído!', 'info');
+            }
+        };
+
+        // ====================
+        // ATUALIZAR UI
+        // ====================
+        function updateTotalItems() {
+            elements.totalItems.textContent = state.scannedItems.length;
+            elements.lastUpdate.textContent = new Date().toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function updateCounters() {
+            elements.productScanCount.textContent = state.productScanCount;
+            elements.locationScanCount.textContent = state.locationScanCount;
+        }
+
+        function updateUI() {
+            updateQuantityDisplay();
+            updateScanStatus();
+            updateTable();
+            updateTotalItems();
+            updateCounters();
+        }
+
+        // ====================
+        // NOTIFICAÇÃO SIMPLES
+        // ====================
+        function showNotification(message, type = 'info') {
+            const notification = elements.notification;
+            notification.textContent = message;
+            notification.className = `simple-notification ${type}`;
+            notification.style.display = 'flex';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 2000);
+        }
+
+        // ====================
+        // PREVENIR FECHAMENTO
+        // ====================
+        window.addEventListener('beforeunload', () => {
+            if (state.isProductScanning) state.productScanner.stop().catch(() => {});
+            if (state.isLocationScanning) state.locationScanner.stop().catch(() => {});
+        });
+
+        // Configurar eventos touch
+        document.addEventListener('touchstart', () => {}, { passive: true });
+    </script>
+</body>
+</html>
