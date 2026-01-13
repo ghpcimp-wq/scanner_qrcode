@@ -26,112 +26,6 @@
             align-items: center;
         }
 
-        /* TELA INICIAL */
-        .login-container {
-            width: 100%;
-            max-width: 400px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px 30px;
-            text-align: center;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .login-logo {
-            font-size: 4rem;
-            margin-bottom: 20px;
-        }
-
-        .login-title {
-            color: #1a2980;
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .login-subtitle {
-            color: #64748b;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-
-        .login-form {
-            margin-top: 30px;
-        }
-
-        .input-group {
-            margin-bottom: 25px;
-            text-align: left;
-        }
-
-        .input-label {
-            display: block;
-            color: #1a2980;
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 18px;
-            border: 3px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            color: #1a2980;
-            background: #f8fafc;
-            transition: all 0.3s;
-        }
-
-        .login-input:focus {
-            border-color: #1a2980;
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(26, 41, 128, 0.1);
-            background: white;
-            transform: scale(1.02);
-        }
-
-        .login-input::placeholder {
-            color: #94a3b8;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(135deg, #1a2980, #26d0ce);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .login-btn:active {
-            transform: scale(0.98);
-        }
-
-        .login-hint {
-            color: #94a3b8;
-            font-size: 0.9rem;
-            margin-top: 15px;
-            font-style: italic;
-        }
-
-        /* APLICATIVO PRINCIPAL (oculto inicialmente) */
         .app-container {
             width: 100%;
             max-width: 800px;
@@ -139,7 +33,6 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
-            display: none; /* Inicialmente oculto */
         }
 
         .app-header {
@@ -160,23 +53,9 @@
         .app-title {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 15px;
             font-size: 2rem;
             font-weight: 700;
-            flex-wrap: wrap;
-        }
-
-        .operator-info {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 10px;
         }
 
         .github-badge {
@@ -190,6 +69,50 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .operator-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .operator-label {
+            display: block;
+            color: white;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .operator-input {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 15px;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1a2980;
+            transition: all 0.3s;
+            display: block;
+        }
+
+        .operator-input:focus {
+            border-color: white;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
+            background: white;
+            transform: scale(1.02);
+        }
+
+        .operator-input::placeholder {
+            color: #64748b;
         }
 
         .scanner-grid {
@@ -526,7 +449,7 @@
 
         .history-table {
             width: 100%;
-            min-width: 700px; /* Aumentado para acomodar nova coluna */
+            min-width: 700px;
             border-collapse: collapse;
             background: white;
             border-radius: 12px;
@@ -714,32 +637,6 @@
             z-index: 100;
         }
 
-        .logout-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            padding: 10px 18px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-            z-index: 100;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: rgba(239, 68, 68, 1);
-            transform: scale(1.05);
-        }
-
         @media (max-width: 768px) {
             .app-title {
                 font-size: 1.6rem;
@@ -748,13 +645,11 @@
                 font-size: 1.5rem;
                 padding: 16px;
             }
-            .github-link, .logout-btn {
+            .github-link {
                 bottom: 15px;
+                right: 15px;
                 font-size: 0.9rem;
                 padding: 10px 16px;
-            }
-            .logout-btn {
-                left: 15px;
             }
             
             .history-table th,
@@ -781,8 +676,9 @@
                 padding: 14px;
             }
             
-            .login-btn {
-                min-height: 60px;
+            .operator-input {
+                font-size: 1rem;
+                padding: 16px;
             }
             
             .quantity-input-simple {
@@ -802,52 +698,27 @@
     </style>
 </head>
 <body>
-    <!-- TELA DE LOGIN -->
-    <div class="login-container" id="loginContainer">
-        <div class="login-logo">📦</div>
-        <h1 class="login-title">Scanner Estoque</h1>
-        <p class="login-subtitle">
-            Sistema de controle de inventário<br>
-            Escaneie produtos, registre quantidades<br>
-            e exporte para Excel
-        </p>
-        
-        <form class="login-form" id="loginForm">
-            <div class="input-group">
-                <label class="input-label">Nome do Operador:</label>
-                <input 
-                    type="text" 
-                    id="operatorName"
-                    class="login-input"
-                    placeholder="Digite seu nome"
-                    required
-                    autofocus
-                >
-            </div>
-            
-            <button type="submit" class="login-btn">
-                <span>→</span> Entrar no Sistema
-            </button>
-        </form>
-        
-        <p class="login-hint">
-            O nome será registrado em todos os itens escaneados
-        </p>
-    </div>
-
-    <!-- APLICATIVO PRINCIPAL -->
-    <div class="app-container" id="appContainer">
+    <div class="app-container">
         <header class="app-header">
             <div class="header-content">
                 <div class="app-title">
                     <span>📦</span>
                     <h1>Scanner Estoque</h1>
                 </div>
-                <div class="operator-info" id="operatorInfo">
-                    <span>👤</span>
-                    <span id="currentOperator">Operador</span>
-                </div>
                 <p>Escaneie produto e local, digite quantidade e salve</p>
+                
+                <!-- NOVO: Campo para nome do operador -->
+                <div class="operator-section">
+                    <label class="operator-label">Operador:</label>
+                    <input 
+                        type="text" 
+                        id="operatorName"
+                        class="operator-input"
+                        placeholder="Digite seu nome"
+                        value=""
+                    >
+                </div>
+                
                 <div class="github-badge">
                     🌐 Hospedado no GitHub Pages
                 </div>
@@ -1031,11 +902,6 @@
         <span>🐙</span> GitHub Pages
     </a>
 
-    <!-- Botão de Logout -->
-    <button id="logoutBtn" class="logout-btn" style="display: none;">
-        <span>🚪</span> Trocar Operador
-    </button>
-
     <script>
         // ====================
         // ESTADO DO SISTEMA
@@ -1058,16 +924,8 @@
         // ELEMENTOS DOM
         // ====================
         const DOM = {
-            // Tela de login
-            loginContainer: document.getElementById('loginContainer'),
-            loginForm: document.getElementById('loginForm'),
+            // Campo do operador
             operatorName: document.getElementById('operatorName'),
-            
-            // Aplicativo principal
-            appContainer: document.getElementById('appContainer'),
-            operatorInfo: document.getElementById('operatorInfo'),
-            currentOperator: document.getElementById('currentOperator'),
-            logoutBtn: document.getElementById('logoutBtn'),
             
             // Scanners
             productCamera: document.getElementById('productCamera'),
@@ -1106,35 +964,71 @@
         // ====================
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 Scanner Estoque - GitHub Pages');
-            console.log('👤 Sistema com autenticação de operador');
+            console.log('👤 Sistema com registro de operador');
             
-            checkOperator();
+            initApp();
             setupEventListeners();
+            updateUI();
             
-            // Se já houver operador salvo, mostrar tela principal
-            if (appState.currentOperator) {
-                showMainApp();
-            }
+            // Mostrar mensagem de boas-vindas
+            setTimeout(() => {
+                if (appState.currentOperator) {
+                    showNotification(`👋 Bem-vindo de volta, ${appState.currentOperator}!`, 'success');
+                } else {
+                    showNotification('✅ Sistema pronto! Digite seu nome e comece a escanear', 'info');
+                    DOM.operatorName.focus();
+                }
+            }, 800);
         });
 
-        function checkOperator() {
-            // Verificar se já tem operador salvo
-            const savedOperator = localStorage.getItem('estoqueOperator');
-            if (savedOperator) {
-                appState.currentOperator = savedOperator;
-                // Preencher campo de login com o nome salvo
-                DOM.operatorName.value = savedOperator;
+        function initApp() {
+            // Carregar nome do operador salvo
+            if (appState.currentOperator) {
+                DOM.operatorName.value = appState.currentOperator;
             }
+            
+            // Inicializar scanners
+            appState.productScanner = new Html5Qrcode("productCamera");
+            appState.locationScanner = new Html5Qrcode("locationCamera");
+            
+            // Configurar input de quantidade
+            setupQuantityInput();
+            
+            // Atualizar contadores
+            updateCounters();
+            updateStats();
         }
 
         function setupEventListeners() {
-            // Evento do formulário de login
-            DOM.loginForm.addEventListener('submit', handleLogin);
+            // Evento para salvar nome do operador
+            DOM.operatorName.addEventListener('input', function() {
+                const operatorName = this.value.trim();
+                appState.currentOperator = operatorName;
+                localStorage.setItem('estoqueOperator', operatorName);
+                
+                // Feedback visual
+                if (operatorName) {
+                    this.style.borderColor = '#10b981';
+                    this.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.2)';
+                } else {
+                    this.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                    this.style.boxShadow = 'none';
+                }
+            });
             
-            // Evento do botão de logout
-            DOM.logoutBtn.addEventListener('click', handleLogout);
+            // Evento para salvar ao pressionar Enter
+            DOM.operatorName.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    DOM.quantitySimple.focus();
+                    
+                    if (this.value.trim()) {
+                        showNotification(`👤 Operador: ${this.value.trim()}`, 'success');
+                    }
+                }
+            });
             
-            // Eventos dos scanners (serão configurados após login)
+            // Eventos dos scanners
             DOM.startProductBtn.addEventListener('click', () => startScanner('product'));
             DOM.stopProductBtn.addEventListener('click', () => stopScanner('product'));
             DOM.startLocationBtn.addEventListener('click', () => startScanner('location'));
@@ -1148,85 +1042,6 @@
             
             // Configurar scroll horizontal
             setupTouchScrolling();
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            
-            const operatorName = DOM.operatorName.value.trim();
-            
-            if (!operatorName) {
-                showNotification('Digite seu nome para continuar', 'error');
-                DOM.operatorName.focus();
-                return;
-            }
-            
-            // Salvar nome do operador
-            appState.currentOperator = operatorName;
-            localStorage.setItem('estoqueOperator', operatorName);
-            
-            // Mostrar tela principal
-            showMainApp();
-            
-            // Mostrar mensagem de boas-vindas
-            setTimeout(() => {
-                showNotification(`👋 Bem-vindo, ${operatorName}! Sistema pronto para uso.`, 'success');
-            }, 500);
-        }
-
-        function handleLogout() {
-            if (confirm('Deseja trocar de operador? Todos os dados continuarão salvos.')) {
-                // Parar scanners se estiverem ativos
-                if (appState.isProductScanning) {
-                    stopScanner('product');
-                }
-                if (appState.isLocationScanning) {
-                    stopScanner('location');
-                }
-                
-                // Esconder aplicativo principal
-                DOM.appContainer.style.display = 'none';
-                DOM.logoutBtn.style.display = 'none';
-                
-                // Mostrar tela de login
-                DOM.loginContainer.style.display = 'block';
-                DOM.operatorName.focus();
-                
-                // Limpar nome do operador atual (opcional)
-                // localStorage.removeItem('estoqueOperator');
-                // appState.currentOperator = '';
-                
-                showNotification('🔄 Pronto para novo operador', 'info');
-            }
-        }
-
-        function showMainApp() {
-            // Esconder tela de login
-            DOM.loginContainer.style.display = 'none';
-            
-            // Mostrar aplicativo principal
-            DOM.appContainer.style.display = 'block';
-            DOM.logoutBtn.style.display = 'flex';
-            
-            // Atualizar nome do operador na interface
-            DOM.currentOperator.textContent = appState.currentOperator;
-            
-            // Inicializar scanners
-            initApp();
-            updateUI();
-        }
-
-        function initApp() {
-            // Inicializar scanners
-            appState.productScanner = new Html5Qrcode("productCamera");
-            appState.locationScanner = new Html5Qrcode("locationCamera");
-            
-            // Configurar input de quantidade
-            setupQuantityInput();
-            
-            // Atualizar contadores
-            updateCounters();
-            updateStats();
         }
 
         function setupQuantityInput() {
@@ -1258,17 +1073,19 @@
                 this.value = numbers;
                 appState.currentQuantity = parseInt(numbers) || 1;
             });
-            
-            // Foco no campo de quantidade
-            setTimeout(() => {
-                DOM.quantitySimple.focus();
-            }, 1000);
         }
 
         // ====================
         // FUNÇÕES DO SCANNER
         // ====================
         async function startScanner(type) {
+            // Verificar se o operador foi informado
+            if (!appState.currentOperator) {
+                showNotification('Digite seu nome antes de escanear!', 'error');
+                DOM.operatorName.focus();
+                return;
+            }
+            
             if ((type === 'product' && appState.isProductScanning) || 
                 (type === 'location' && appState.isLocationScanning)) {
                 return;
@@ -1416,6 +1233,13 @@
         // SALVAR ITEM (COM OPERADOR)
         // ====================
         function saveCurrentItem() {
+            // Verificar se o operador foi informado
+            if (!appState.currentOperator) {
+                showNotification('Digite seu nome antes de salvar!', 'error');
+                DOM.operatorName.focus();
+                return;
+            }
+            
             if (!appState.currentProduct || !appState.currentLocation) {
                 showNotification('Escaneie o produto e o local primeiro!', 'error');
                 return;
@@ -1430,7 +1254,7 @@
                 product: appState.currentProduct,
                 location: appState.currentLocation,
                 quantity: appState.currentQuantity,
-                operator: appState.currentOperator, // NOVO: Adiciona operador
+                operator: appState.currentOperator,
                 timestamp: new Date().toLocaleString('pt-BR'),
                 type: 'scanned',
                 dataRegistro: new Date().toISOString()
@@ -1467,6 +1291,13 @@
         // ADIÇÃO MANUAL (COM OPERADOR)
         // ====================
         function addManualItem() {
+            // Verificar se o operador foi informado
+            if (!appState.currentOperator) {
+                showNotification('Digite seu nome antes de adicionar manualmente!', 'error');
+                DOM.operatorName.focus();
+                return;
+            }
+            
             const product = prompt('Digite o código do produto:');
             if (!product) return;
             
@@ -1481,7 +1312,7 @@
                 product: product.trim(),
                 location: location.trim(),
                 quantity: quantity,
-                operator: appState.currentOperator, // NOVO: Adiciona operador
+                operator: appState.currentOperator,
                 timestamp: new Date().toLocaleString('pt-BR'),
                 type: 'manual',
                 dataRegistro: new Date().toISOString()
@@ -1511,7 +1342,7 @@
                     'Produto': item.product,
                     'Local': item.location,
                     'Quantidade': item.quantity,
-                    'Operador': item.operator, // NOVO: Coluna de operador
+                    'Operador': item.operator,
                     'Data': item.timestamp.split(' ')[0],
                     'Hora': item.timestamp.split(' ')[1],
                     'Tipo': item.type === 'scanned' ? 'Escaneado' : 'Manual',
@@ -1527,7 +1358,7 @@
                     { wch: 25 }, // Produto
                     { wch: 25 }, // Local
                     { wch: 12 }, // Quantidade
-                    { wch: 20 }, // Operador (NOVA)
+                    { wch: 20 }, // Operador
                     { wch: 12 }, // Data
                     { wch: 10 }, // Hora
                     { wch: 12 }, // Tipo
@@ -1553,7 +1384,7 @@
                 
                 // Adicionar uma segunda sheet com totais
                 const totalsData = [{
-                    'Operador Atual': appState.currentOperator,
+                    'Operador Atual': appState.currentOperator || 'Não informado',
                     'Total de Itens': appState.scannedItems.length,
                     'Quantidade Total': appState.scannedItems.reduce((sum, item) => sum + item.quantity, 0),
                     'Data da Exportação': new Date().toLocaleString('pt-BR'),
@@ -1564,8 +1395,13 @@
                 const ws2 = XLSX.utils.json_to_sheet(totalsData);
                 XLSX.utils.book_append_sheet(wb, ws2, "Resumo");
                 
-                // Gerar nome do arquivo com operador
-                const fileName = `estoque_${appState.currentOperator.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`;
+                // Gerar nome do arquivo com operador ou data
+                let fileName;
+                if (appState.currentOperator) {
+                    fileName = `estoque_${appState.currentOperator.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`;
+                } else {
+                    fileName = `estoque_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}_${new Date().getTime()}.xlsx`;
+                }
                 
                 // Salvar arquivo
                 XLSX.writeFile(wb, fileName);
