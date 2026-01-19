@@ -73,7 +73,7 @@
             gap: 8px;
         }
 
-        /* NOVO: Seção do Operador */
+        /* Seção do Operador */
         .operator-section {
             background: rgba(255, 255, 255, 0.15);
             padding: 20px;
@@ -224,6 +224,58 @@
             color: white;
             width: 100%;
             padding: 20px;
+        }
+
+        /* Controles da Câmera */
+        .camera-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 20;
+            display: flex;
+            gap: 10px;
+        }
+
+        .camera-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .camera-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        .camera-btn.active {
+            background: #4caf50;
+        }
+
+        .camera-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .camera-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 20;
         }
 
         .scanned-result {
@@ -415,7 +467,7 @@
 
         .history-table {
             width: 100%;
-            min-width: 700px;
+            min-width: 750px;
             border-collapse: collapse;
             background: white;
             border-radius: 12px;
@@ -476,6 +528,31 @@
         .sync-badge.pending {
             background: #fef3c7;
             color: #92400e;
+        }
+
+        /* NOVO: Botão de Excluir */
+        .delete-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .delete-btn:hover {
+            background: #fecaca;
+            transform: scale(1.05);
+        }
+
+        .delete-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .notification {
@@ -545,10 +622,79 @@
             margin-top: 5px;
         }
 
+        /* Modal de Confirmação */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal h3 {
+            color: #1a2980;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .modal p {
+            color: #64748b;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 100px;
+        }
+
+        .modal-btn-cancel {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .modal-btn-delete {
+            background: #dc2626;
+            color: white;
+        }
+
+        .modal-btn:hover {
+            transform: scale(1.05);
+        }
+
         @media (max-width: 768px) {
             .app-title { font-size: 1.6rem; }
             .quantity-input-simple { font-size: 1.5rem; padding: 16px; }
             .operator-input { font-size: 1rem; padding: 12px; }
+            .camera-btn { width: 36px; height: 36px; font-size: 1rem; }
+            .camera-indicator { font-size: 0.7rem; padding: 3px 8px; }
+            .history-table { min-width: 800px; }
+            .delete-btn { padding: 6px 12px; font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -562,7 +708,7 @@
                 </div>
                 <p>Escaneie produto e local, digite quantidade e salve</p>
                 
-                <!-- NOVO: Campo do Operador -->
+                <!-- Campo do Operador -->
                 <div class="operator-section">
                     <label class="operator-label">👤 Nome do Operador:</label>
                     <input 
@@ -599,6 +745,18 @@
                 </div>
                 
                 <div class="camera-container" id="productCamera">
+                    <!-- Indicador de Câmera -->
+                    <div class="camera-indicator" id="productCameraIndicator">
+                        📷 Aguardando...
+                    </div>
+                    
+                    <!-- Controles da Câmera -->
+                    <div class="camera-controls" id="productCameraControls" style="display: none;">
+                        <button class="camera-btn" id="productSwitchCameraBtn" title="Alternar câmera">
+                            🔄
+                        </button>
+                    </div>
+                    
                     <div class="camera-placeholder">
                         <div style="font-size: 3rem; margin-bottom: 15px;">📷</div>
                         <div style="font-size: 1.1rem; margin-bottom: 8px;">Scanner de Produto</div>
@@ -631,6 +789,18 @@
                 </div>
                 
                 <div class="camera-container" id="locationCamera">
+                    <!-- Indicador de Câmera -->
+                    <div class="camera-indicator" id="locationCameraIndicator">
+                        📷 Aguardando...
+                    </div>
+                    
+                    <!-- Controles da Câmera -->
+                    <div class="camera-controls" id="locationCameraControls" style="display: none;">
+                        <button class="camera-btn" id="locationSwitchCameraBtn" title="Alternar câmera">
+                            🔄
+                        </button>
+                    </div>
+                    
                     <div class="camera-placeholder">
                         <div style="font-size: 3rem; margin-bottom: 15px;">📷</div>
                         <div style="font-size: 1.1rem; margin-bottom: 8px;">Scanner de Local</div>
@@ -718,11 +888,12 @@
                             <th>Operador</th>
                             <th>Data/Hora</th>
                             <th>Status</th>
+                            <th>Ação</th> <!-- NOVA COLUNA -->
                         </tr>
                     </thead>
                     <tbody id="historyBody">
                         <tr>
-                            <td colspan="6" class="empty-state">
+                            <td colspan="7" class="empty-state">
                                 Nenhum item adicionado ainda. Comece escaneando!
                             </td>
                         </tr>
@@ -753,6 +924,22 @@
         </footer>
     </div>
 
+    <!-- NOVO: Modal de Confirmação -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <h3>🗑️ Excluir Registro</h3>
+            <p id="deleteModalMessage">Tem certeza que deseja excluir este registro?</p>
+            <div class="modal-buttons">
+                <button id="cancelDeleteBtn" class="modal-btn modal-btn-cancel">
+                    Cancelar
+                </button>
+                <button id="confirmDeleteBtn" class="modal-btn modal-btn-delete">
+                    Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notificação -->
     <div id="notification" class="notification"></div>
 
@@ -781,7 +968,18 @@
             isLocationScanning: false,
             isFirebaseConnected: false,
             scannedItems: JSON.parse(localStorage.getItem('estoqueItems')) || [],
-            pendingSync: JSON.parse(localStorage.getItem('estoquePendingSync')) || []
+            pendingSync: JSON.parse(localStorage.getItem('estoquePendingSync')) || [],
+            pendingDelete: JSON.parse(localStorage.getItem('estoquePendingDelete')) || [],
+            
+            // Gerenciamento de câmeras
+            cameras: [],
+            productCameraId: null,
+            locationCameraId: null,
+            productCameraType: 'back',
+            locationCameraType: 'back',
+            
+            // Controle de exclusão
+            itemToDelete: null
         };
 
         // ====================
@@ -796,9 +994,16 @@
             firebaseStatusText: document.getElementById('firebaseStatusText'),
             firebaseBadge: document.getElementById('firebaseBadge'),
             
-            // Scanners
+            // Scanners e Câmeras
             productCamera: document.getElementById('productCamera'),
             locationCamera: document.getElementById('locationCamera'),
+            productCameraIndicator: document.getElementById('productCameraIndicator'),
+            locationCameraIndicator: document.getElementById('locationCameraIndicator'),
+            productCameraControls: document.getElementById('productCameraControls'),
+            locationCameraControls: document.getElementById('locationCameraControls'),
+            productSwitchCameraBtn: document.getElementById('productSwitchCameraBtn'),
+            locationSwitchCameraBtn: document.getElementById('locationSwitchCameraBtn'),
+            
             startProductBtn: document.getElementById('startProductBtn'),
             stopProductBtn: document.getElementById('stopProductBtn'),
             startLocationBtn: document.getElementById('startLocationBtn'),
@@ -824,6 +1029,12 @@
             totalQuantity: document.getElementById('totalQuantity'),
             lastSync: document.getElementById('lastSync'),
             
+            // Modal de Exclusão
+            deleteModal: document.getElementById('deleteModal'),
+            deleteModalMessage: document.getElementById('deleteModalMessage'),
+            cancelDeleteBtn: document.getElementById('cancelDeleteBtn'),
+            confirmDeleteBtn: document.getElementById('confirmDeleteBtn'),
+            
             // Notificação
             notification: document.getElementById('notification')
         };
@@ -832,8 +1043,8 @@
         // INICIALIZAÇÃO
         // ====================
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 Scanner Estoque - Firebase Pré-configurado');
-            console.log('🔥 Firebase configurado automaticamente');
+            console.log('🚀 Scanner Estoque - Firebase com Exclusão');
+            console.log('🗑️ Sistema com exclusão de registros habilitada');
             
             // Carregar nome do operador salvo
             if (appState.currentOperator) {
@@ -846,6 +1057,9 @@
             
             // Conectar automaticamente ao Firebase
             await initializeFirebase();
+            
+            // Detectar câmeras disponíveis
+            await detectCameras();
             
             // Focar no campo do operador
             setTimeout(() => {
@@ -896,6 +1110,10 @@
                 }
             });
             
+            // Botões de alternância de câmera
+            DOM.productSwitchCameraBtn.addEventListener('click', () => switchCamera('product'));
+            DOM.locationSwitchCameraBtn.addEventListener('click', () => switchCamera('location'));
+            
             // Eventos dos scanners
             DOM.startProductBtn.addEventListener('click', () => startScanner('product'));
             DOM.stopProductBtn.addEventListener('click', () => stopScanner('product'));
@@ -908,13 +1126,256 @@
             DOM.addManualBtn.addEventListener('click', addManualItem);
             DOM.syncDataBtn.addEventListener('click', syncAllPending);
             
+            // Modal de exclusão
+            DOM.cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+            DOM.confirmDeleteBtn.addEventListener('click', confirmDeleteItem);
+            
             // Monitorar status online/offline
             window.addEventListener('online', handleOnlineStatus);
             window.addEventListener('offline', handleOfflineStatus);
         }
 
         // ====================
-        // FIREBASE (PRÉ-CONFIGURADO)
+        // FUNÇÕES DE EXCLUSÃO
+        // ====================
+        function showDeleteModal(item) {
+            appState.itemToDelete = item;
+            
+            DOM.deleteModalMessage.textContent = 
+                `Tem certeza que deseja excluir este registro?\n\n` +
+                `Produto: ${item.product}\n` +
+                `Local: ${item.location}\n` +
+                `Quantidade: ${item.quantity}\n` +
+                `Operador: ${item.operator}\n` +
+                `Data: ${item.timestamp}`;
+            
+            DOM.deleteModal.style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            DOM.deleteModal.style.display = 'none';
+            appState.itemToDelete = null;
+        }
+
+        async function confirmDeleteItem() {
+            if (!appState.itemToDelete) {
+                closeDeleteModal();
+                return;
+            }
+            
+            const item = appState.itemToDelete;
+            const deletedFromFirebase = await deleteFromFirebase(item);
+            
+            if (deletedFromFirebase || !appState.isFirebaseConnected) {
+                // Remover do histórico local
+                appState.scannedItems = appState.scannedItems.filter(it => it.id !== item.id);
+                localStorage.setItem('estoqueItems', JSON.stringify(appState.scannedItems));
+                
+                // Remover dos pendentes se existir
+                appState.pendingSync = appState.pendingSync.filter(it => it.id !== item.id);
+                localStorage.setItem('estoquePendingSync', JSON.stringify(appState.pendingSync));
+                
+                showNotification(`🗑️ Registro excluído com sucesso!`, 'success');
+                updateUI();
+            } else {
+                showNotification('❌ Erro ao excluir do Firebase', 'error');
+            }
+            
+            closeDeleteModal();
+        }
+
+        async function deleteFromFirebase(item) {
+            // Se não tem firebaseId, nunca foi sincronizado
+            if (!item.firebaseId) {
+                return true;
+            }
+            
+            if (!database || !appState.isFirebaseConnected) {
+                // Adicionar à fila de exclusões pendentes
+                item.deleteStatus = 'pending';
+                appState.pendingDelete.push(item);
+                localStorage.setItem('estoquePendingDelete', JSON.stringify(appState.pendingDelete));
+                return false;
+            }
+            
+            try {
+                const itemRef = database.ref(`items/${item.firebaseId}`);
+                await itemRef.remove();
+                
+                // Remover das exclusões pendentes
+                appState.pendingDelete = appState.pendingDelete.filter(it => it.id !== item.id);
+                localStorage.setItem('estoquePendingDelete', JSON.stringify(appState.pendingDelete));
+                
+                return true;
+            } catch (error) {
+                console.error('Erro ao excluir do Firebase:', error);
+                
+                // Adicionar à fila de exclusões pendentes
+                item.deleteStatus = 'pending';
+                if (!appState.pendingDelete.some(it => it.id === item.id)) {
+                    appState.pendingDelete.push(item);
+                    localStorage.setItem('estoquePendingDelete', JSON.stringify(appState.pendingDelete));
+                }
+                
+                return false;
+            }
+        }
+
+        async function syncPendingDeletes() {
+            if (!appState.isFirebaseConnected || appState.pendingDelete.length === 0) {
+                return;
+            }
+            
+            let deletedCount = 0;
+            const pendingCopy = [...appState.pendingDelete];
+            
+            for (const item of pendingCopy) {
+                if (item.deleteStatus === 'pending') {
+                    const success = await deleteFromFirebase(item);
+                    if (success) {
+                        deletedCount++;
+                    }
+                }
+            }
+            
+            if (deletedCount > 0) {
+                console.log(`🗑️ ${deletedCount} exclusões sincronizadas com Firebase`);
+            }
+        }
+
+        // ====================
+        // FUNÇÕES DE CÂMERA
+        // ====================
+        async function detectCameras() {
+            try {
+                const devices = await Html5Qrcode.getCameras();
+                appState.cameras = devices;
+                
+                console.log(`📷 Câmeras detectadas: ${devices.length}`);
+                
+                // Tentar encontrar câmera traseira por padrão
+                const backCamera = devices.find(camera => 
+                    camera.label.toLowerCase().includes('back') ||
+                    camera.label.toLowerCase().includes('traseira') ||
+                    camera.label.toLowerCase().includes('rear') ||
+                    camera.label.includes('2') ||
+                    camera.label.includes('1')
+                );
+                
+                // Definir câmeras padrão
+                if (backCamera) {
+                    appState.productCameraId = backCamera.id;
+                    appState.locationCameraId = backCamera.id;
+                    console.log('📷 Usando câmera traseira como padrão');
+                } else if (devices.length > 0) {
+                    appState.productCameraId = devices[0].id;
+                    appState.locationCameraId = devices[0].id;
+                    console.log('📷 Usando primeira câmera disponível');
+                }
+                
+                // Atualizar indicadores
+                updateCameraIndicators();
+                
+            } catch (error) {
+                console.error('Erro ao detectar câmeras:', error);
+                showNotification('⚠️ Não foi possível detectar câmeras', 'warning');
+            }
+        }
+
+        function getCameraId(type, cameraType = null) {
+            if (!appState.cameras || appState.cameras.length === 0) {
+                return null;
+            }
+            
+            const currentCameraType = cameraType || (type === 'product' ? appState.productCameraType : appState.locationCameraType);
+            
+            if (currentCameraType === 'back') {
+                // Buscar câmera traseira
+                const backCamera = appState.cameras.find(camera => 
+                    camera.label.toLowerCase().includes('back') ||
+                    camera.label.toLowerCase().includes('traseira') ||
+                    camera.label.toLowerCase().includes('rear') ||
+                    camera.label.includes('2')
+                );
+                
+                if (backCamera) {
+                    return backCamera.id;
+                }
+            } else if (currentCameraType === 'front') {
+                // Buscar câmera frontal
+                const frontCamera = appState.cameras.find(camera => 
+                    camera.label.toLowerCase().includes('front') ||
+                    camera.label.toLowerCase().includes('frontal') ||
+                    camera.label.includes('0') ||
+                    camera.label.includes('1')
+                );
+                
+                if (frontCamera) {
+                    return frontCamera.id;
+                }
+            }
+            
+            // Se não encontrou, retorna a primeira câmera
+            return appState.cameras[0]?.id;
+        }
+
+        function updateCameraIndicators() {
+            const productCameraType = appState.productCameraType === 'back' ? 'Traseira' : 'Frontal';
+            const locationCameraType = appState.locationCameraType === 'back' ? 'Traseira' : 'Frontal';
+            
+            DOM.productCameraIndicator.textContent = `📷 Câmera: ${productCameraType}`;
+            DOM.locationCameraIndicator.textContent = `📷 Câmera: ${locationCameraType}`;
+            
+            // Mostrar botão de alternância se houver mais de uma câmera
+            if (appState.cameras && appState.cameras.length > 1) {
+                DOM.productCameraControls.style.display = 'flex';
+                DOM.locationCameraControls.style.display = 'flex';
+            }
+        }
+
+        async function switchCamera(type) {
+            try {
+                const scanner = type === 'product' ? appState.productScanner : appState.locationScanner;
+                const isScanning = type === 'product' ? appState.isProductScanning : appState.isLocationScanning;
+                
+                if (!isScanning) {
+                    // Apenas alternar o tipo sem iniciar scanner
+                    if (type === 'product') {
+                        appState.productCameraType = appState.productCameraType === 'back' ? 'front' : 'back';
+                    } else {
+                        appState.locationCameraType = appState.locationCameraType === 'back' ? 'front' : 'back';
+                    }
+                    
+                    updateCameraIndicators();
+                    showNotification(`📷 Câmera ${type === 'product' ? 'Produto' : 'Local'} alterada`, 'info');
+                    return;
+                }
+                
+                // Se estiver escaneando, parar e reiniciar com nova câmera
+                await stopScanner(type);
+                
+                // Alternar tipo de câmera
+                if (type === 'product') {
+                    appState.productCameraType = appState.productCameraType === 'back' ? 'front' : 'back';
+                } else {
+                    appState.locationCameraType = appState.locationCameraType === 'back' ? 'front' : 'back';
+                }
+                
+                updateCameraIndicators();
+                
+                // Reiniciar scanner com nova câmera
+                await startScanner(type);
+                
+                showNotification(`📷 Câmera ${type === 'product' ? 'Produto' : 'Local'} alterada`, 'success');
+                
+            } catch (error) {
+                console.error(`Erro ao alternar câmera ${type}:`, error);
+                showNotification('❌ Erro ao alternar câmera', 'error');
+            }
+        }
+
+        // ====================
+        // FIREBASE
         // ====================
         async function initializeFirebase() {
             try {
@@ -944,7 +1405,7 @@
                 showNotification('🔥 Firebase conectado com sucesso!', 'success');
                 
                 // Sincronizar dados pendentes
-                syncPendingItems();
+                await Promise.all([syncPendingItems(), syncPendingDeletes()]);
                 
             } catch (error) {
                 console.error('Erro ao conectar Firebase:', error);
@@ -968,6 +1429,7 @@
                     appState.isFirebaseConnected = true;
                     updateFirebaseStatus('✅ Conectado ao Firebase', 'connected');
                     syncPendingItems();
+                    syncPendingDeletes();
                 } else {
                     appState.isFirebaseConnected = false;
                     updateFirebaseStatus('📴 Offline - Dados locais', 'offline');
@@ -980,7 +1442,7 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-            }, 60000); // Atualiza a cada minuto
+            }, 60000);
         }
 
         async function saveToFirebase(item) {
@@ -1004,6 +1466,11 @@
                 };
                 
                 await newItemRef.set(firebaseItem);
+                
+                // Atualizar item local com firebaseId
+                item.firebaseId = newItemRef.key;
+                item.syncStatus = 'synced';
+                item.syncedAt = new Date().toLocaleString('pt-BR');
                 
                 // Remover dos pendentes
                 const pendingIndex = appState.pendingSync.findIndex(it => it.id === item.id);
@@ -1044,13 +1511,6 @@
                     const success = await saveToFirebase(item);
                     if (success) {
                         syncedCount++;
-                        
-                        // Atualizar o item na lista principal
-                        const mainItem = appState.scannedItems.find(it => it.id === item.id);
-                        if (mainItem) {
-                            mainItem.syncStatus = 'synced';
-                            mainItem.syncedAt = item.syncedAt;
-                        }
                     }
                 }
             }
@@ -1072,7 +1532,7 @@
                 return;
             }
             
-            await syncPendingItems();
+            await Promise.all([syncPendingItems(), syncPendingDeletes()]);
         }
 
         // ====================
@@ -1085,12 +1545,21 @@
             }
             
             try {
-                const cameras = await Html5Qrcode.getCameras();
-                if (cameras.length === 0) {
+                if (appState.cameras.length === 0) {
+                    await detectCameras();
+                }
+                
+                if (appState.cameras.length === 0) {
                     throw new Error('Nenhuma câmera detectada');
                 }
                 
-                const cameraId = cameras[0].id;
+                // Obter ID da câmera baseado no tipo preferido
+                const cameraId = getCameraId(type);
+                
+                if (!cameraId) {
+                    throw new Error('Câmera não encontrada');
+                }
+                
                 const scanner = type === 'product' ? appState.productScanner : appState.locationScanner;
                 
                 await scanner.start(
@@ -1118,11 +1587,14 @@
                     DOM.stopLocationBtn.disabled = false;
                 }
                 
+                // Atualizar indicador da câmera
+                updateCameraIndicators();
+                
                 showNotification(`Scanner ${type === 'product' ? 'Produto' : 'Local'} ativado`, 'info');
                 
             } catch (error) {
                 console.error(`Erro ao iniciar scanner ${type}:`, error);
-                showNotification('Erro ao acessar câmera. Verifique as permissões.', 'error');
+                showNotification('❌ Erro ao acessar câmera: ' + error.message, 'error');
             }
         }
 
@@ -1345,7 +1817,7 @@
             if (appState.scannedItems.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="empty-state">
+                        <td colspan="7" class="empty-state">
                             Nenhum item adicionado ainda. Comece escaneando!
                         </td>
                     </tr>
@@ -1367,6 +1839,11 @@
                             ${item.syncStatus === 'synced' ? '✅ Sincronizado' : '🔄 Pendente'}
                         </span>
                     </td>
+                    <td>
+                        <button onclick="window.requestDeleteItem(${item.id})" class="delete-btn" title="Excluir registro">
+                            🗑️ Excluir
+                        </button>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -1383,6 +1860,16 @@
                 minute: '2-digit'
             });
         }
+
+        // ====================
+        // FUNÇÕES GLOBAIS
+        // ====================
+        window.requestDeleteItem = function(itemId) {
+            const item = appState.scannedItems.find(it => it.id === itemId);
+            if (item) {
+                showDeleteModal(item);
+            }
+        };
 
         // ====================
         // FUNÇÕES AUXILIARES
@@ -1412,6 +1899,7 @@
                 appState.isFirebaseConnected = true;
                 updateFirebaseStatus('✅ Reconectando ao Firebase...', 'connected');
                 syncPendingItems();
+                syncPendingDeletes();
             }
         }
 
