@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📦 Scanner Estoque - GitHub Pages</title>
+    <title>📦 Scanner Estoque - Armazenamento em Nuvem</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <!-- Biblioteca para exportar Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -58,7 +56,7 @@
             font-weight: 700;
         }
 
-        .github-badge {
+        .storage-badge {
             background: rgba(255,255,255,0.2);
             border: 2px solid white;
             padding: 8px 15px;
@@ -71,7 +69,17 @@
             gap: 8px;
         }
 
-        .operator-section {
+        .storage-badge.cloud {
+            background: rgba(66, 133, 244, 0.3);
+            border-color: #4285f4;
+        }
+
+        .storage-badge.local {
+            background: rgba(255, 193, 7, 0.3);
+            border-color: #ffc107;
+        }
+
+        .config-section {
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             margin: 20px 0;
@@ -79,7 +87,7 @@
             border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
-        .operator-label {
+        .config-label {
             display: block;
             color: white;
             font-weight: 600;
@@ -88,14 +96,14 @@
             text-align: center;
         }
 
-        .operator-input {
+        .config-input {
             width: 100%;
             max-width: 400px;
             margin: 0 auto;
             padding: 15px;
             border: 3px solid rgba(255, 255, 255, 0.5);
             border-radius: 12px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-align: center;
             background: rgba(255, 255, 255, 0.9);
             color: #1a2980;
@@ -103,7 +111,7 @@
             display: block;
         }
 
-        .operator-input:focus {
+        .config-input:focus {
             border-color: white;
             outline: none;
             box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
@@ -111,8 +119,45 @@
             transform: scale(1.02);
         }
 
-        .operator-input::placeholder {
-            color: #64748b;
+        .config-hint {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .config-hint a {
+            color: white;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .sync-online {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        .sync-offline {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        .sync-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
         }
 
         .scanner-grid {
@@ -195,64 +240,6 @@
             padding: 20px;
         }
 
-        .camera-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 220px;
-            height: 220px;
-            border: 4px solid;
-            border-radius: 15px;
-            box-shadow: 0 0 0 1000px rgba(0,0,0,0.7);
-            z-index: 10;
-            display: none;
-        }
-
-        .scanner-active .camera-overlay {
-            display: block;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
-        }
-
-        .overlay-green {
-            border-color: #10b981;
-            box-shadow: 0 0 20px #10b981;
-        }
-
-        .overlay-blue {
-            border-color: #3b82f6;
-            box-shadow: 0 0 20px #3b82f6;
-        }
-
-        .scanned-result {
-            background: #f1f5f9;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
-            border-left: 4px solid #1a2980;
-        }
-
-        .result-label {
-            color: #64748b;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .result-value {
-            color: #1a2980;
-            font-size: 1.3rem;
-            font-weight: 700;
-            word-break: break-all;
-            min-height: 28px;
-        }
-
         .btn-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -283,11 +270,6 @@
             color: white;
         }
 
-        .btn-secondary {
-            background: #64748b;
-            color: white;
-        }
-
         .btn-success {
             background: linear-gradient(135deg, #10b981, #34d399);
             color: white;
@@ -314,17 +296,6 @@
             text-align: center;
         }
 
-        .quantity-label {
-            color: #64748b;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
         .quantity-input-simple {
             width: 100%;
             padding: 20px;
@@ -343,21 +314,6 @@
         .quantity-input-simple::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
-        }
-
-        .quantity-input-simple:focus {
-            border-color: #1a2980;
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(26, 41, 128, 0.1);
-            background: white;
-            transform: scale(1.02);
-        }
-
-        .quantity-hint {
-            color: #94a3b8;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            font-style: italic;
         }
 
         .status-message {
@@ -379,12 +335,6 @@
             border: 3px solid #10b981;
         }
 
-        .status-waiting {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            color: #92400e;
-            border: 3px solid #f59e0b;
-        }
-
         .actions-bar {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -399,16 +349,6 @@
             background: white;
         }
 
-        .section-title {
-            color: #1a2980;
-            font-size: 1.6rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* Scroll horizontal para tabela no mobile */
         .table-wrapper {
             width: 100%;
             overflow-x: auto;
@@ -416,35 +356,6 @@
             margin-bottom: 15px;
             border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-
-        .table-wrapper::after {
-            content: '← →';
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(26, 41, 128, 0.9);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            opacity: 0.7;
-            pointer-events: none;
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .table-wrapper::after {
-                display: block;
-                animation: fadeInOut 3s ease-in-out infinite;
-            }
-        }
-
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.9; }
         }
 
         .history-table {
@@ -476,106 +387,20 @@
             white-space: nowrap;
         }
 
-        .history-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .history-table tr:hover {
-            background: #f8fafc;
-        }
-
-        .badge {
-            padding: 5px 12px;
-            border-radius: 20px;
+        .sync-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
             font-size: 0.8rem;
             font-weight: 600;
-            display: inline-block;
-            white-space: nowrap;
+            margin-left: 5px;
         }
 
-        .badge-scanned {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .badge-manual {
-            background: #f3e8ff;
-            color: #7c3aed;
-        }
-
-        .operator-badge {
-            background: #d1fae5;
-            color: #065f46;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            display: inline-block;
-        }
-
-        .delete-action {
-            background: #fee2e2;
-            color: #dc2626;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .delete-action:hover {
-            background: #fecaca;
-            transform: scale(1.05);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #64748b;
-            font-style: italic;
-            font-size: 1.1rem;
-            background: #f8fafc;
-            border-radius: 12px;
-            margin: 10px 0;
-        }
-
-        .app-footer {
-            text-align: center;
-            padding: 20px;
-            color: #64748b;
-            font-size: 0.9rem;
-            border-top: 2px solid #e2e8f0;
-            background: #f8fafc;
-            line-height: 1.6;
-        }
-
-        .stats-bar {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 100px;
-        }
-
-        .stat-value {
-            color: #1a2980;
-            font-size: 1.4rem;
-            font-weight: 700;
-        }
-
-        .stat-label {
-            color: #64748b;
-            font-size: 0.85rem;
-            margin-top: 5px;
+        .sync-btn:hover {
+            background: #3367d6;
         }
 
         .notification {
@@ -598,102 +423,58 @@
         }
 
         @keyframes slideDown {
-            from { 
-                transform: translateX(-50%) translateY(-30px); 
-                opacity: 0;
-            }
-            to { 
-                transform: translateX(-50%) translateY(0); 
-                opacity: 1;
-            }
+            from { transform: translateX(-50%) translateY(-30px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
 
-        .notification-success {
-            background: linear-gradient(135deg, #10b981, #34d399);
-        }
+        .notification-success { background: linear-gradient(135deg, #10b981, #34d399); }
+        .notification-error { background: linear-gradient(135deg, #ef4444, #f87171); }
+        .notification-info { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .notification-warning { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1f2937; }
 
-        .notification-error {
-            background: linear-gradient(135deg, #ef4444, #f87171);
-        }
-
-        .notification-info {
-            background: linear-gradient(135deg, #3b82f6, #60a5fa);
-        }
-
-        .github-link {
+        .modal {
+            display: none;
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #24292e;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            display: flex;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            z-index: 100;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h3 {
+            color: #1a2980;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .modal ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .modal li {
+            margin-bottom: 10px;
+            line-height: 1.5;
         }
 
         @media (max-width: 768px) {
-            .app-title {
-                font-size: 1.6rem;
-            }
-            .quantity-input-simple {
-                font-size: 1.5rem;
-                padding: 16px;
-            }
-            .github-link {
-                bottom: 15px;
-                right: 15px;
-                font-size: 0.9rem;
-                padding: 10px 16px;
-            }
-            
-            .history-table th,
-            .history-table td {
-                padding: 14px 12px;
-                font-size: 0.95rem;
-            }
-            
-            .delete-action {
-                padding: 6px 12px;
-                font-size: 0.9rem;
-            }
-            
-            .badge {
-                padding: 4px 10px;
-                font-size: 0.75rem;
-            }
-        }
-
-        /* Melhorias para touch no Chrome Android */
-        @media (hover: none) and (pointer: coarse) {
-            .btn {
-                min-height: 50px;
-                padding: 14px;
-            }
-            
-            .operator-input {
-                font-size: 1rem;
-                padding: 16px;
-            }
-            
-            .quantity-input-simple {
-                font-size: 1.6rem;
-                padding: 18px;
-                min-height: 60px;
-            }
-            
-            .delete-action {
-                min-width: 70px;
-                min-height: 36px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
+            .app-title { font-size: 1.6rem; }
+            .quantity-input-simple { font-size: 1.5rem; padding: 16px; }
+            .config-input { font-size: 0.9rem; padding: 12px; }
         }
     </style>
 </head>
@@ -707,20 +488,28 @@
                 </div>
                 <p>Escaneie produto e local, digite quantidade e salve</p>
                 
-                <!-- NOVO: Campo para nome do operador -->
-                <div class="operator-section">
-                    <label class="operator-label">Operador:</label>
+                <!-- Configuração do Google Sheets -->
+                <div class="config-section">
+                    <label class="config-label">📊 Armazenamento em Nuvem (Google Sheets)</label>
                     <input 
                         type="text" 
-                        id="operatorName"
-                        class="operator-input"
-                        placeholder="Digite seu nome"
+                        id="googleSheetId"
+                        class="config-input"
+                        placeholder="ID da Planilha Google Sheets"
                         value=""
                     >
+                    <div class="config-hint">
+                        <a href="#" id="setupGuideBtn">Como configurar?</a> | 
+                        <span id="syncStatusText">🔄 Conectando...</span>
+                    </div>
+                    <div class="sync-status" id="syncStatus">
+                        <span>📡 Status: </span>
+                        <span id="syncStatusLabel">Verificando conexão...</span>
+                    </div>
                 </div>
                 
-                <div class="github-badge">
-                    🌐 Hospedado no GitHub Pages
+                <div class="storage-badge cloud" id="storageBadge">
+                    ☁️ Dados sincronizados na nuvem
                 </div>
             </div>
         </header>
@@ -741,7 +530,6 @@
                         <div style="font-size: 1.1rem; margin-bottom: 8px;">Scanner de Produto</div>
                         <div style="font-size: 0.9rem; opacity: 0.8;">Toque em "Iniciar Scanner"</div>
                     </div>
-                    <div class="camera-overlay overlay-green"></div>
                 </div>
                 
                 <div class="scanned-result">
@@ -753,7 +541,7 @@
                     <button id="startProductBtn" class="btn btn-primary">
                         <span>▶</span> Iniciar Scanner
                     </button>
-                    <button id="stopProductBtn" class="btn btn-secondary" disabled>
+                    <button id="stopProductBtn" class="btn btn-warning" disabled>
                         <span>⏹</span> Parar Scanner
                     </button>
                 </div>
@@ -774,7 +562,6 @@
                         <div style="font-size: 1.1rem; margin-bottom: 8px;">Scanner de Local</div>
                         <div style="font-size: 0.9rem; opacity: 0.8;">Toque em "Iniciar Scanner"</div>
                     </div>
-                    <div class="camera-overlay overlay-blue"></div>
                 </div>
                 
                 <div class="scanned-result">
@@ -786,7 +573,7 @@
                     <button id="startLocationBtn" class="btn btn-primary">
                         <span>▶</span> Iniciar Scanner
                     </button>
-                    <button id="stopLocationBtn" class="btn btn-secondary" disabled>
+                    <button id="stopLocationBtn" class="btn btn-warning" disabled>
                         <span>⏹</span> Parar Scanner
                     </button>
                 </div>
@@ -812,7 +599,6 @@
                         min="1"
                         step="1"
                         inputmode="numeric"
-                        pattern="[0-9]*"
                     >
                     <div class="quantity-hint">
                         Digite apenas números (ex: 1, 10, 100, 1000)
@@ -825,7 +611,7 @@
                 
                 <div class="btn-group">
                     <button id="saveItemBtn" class="btn btn-success" disabled>
-                        <span>💾</span> Salvar Item no Estoque
+                        <span>💾</span> Salvar na Nuvem
                     </button>
                     <button id="clearDataBtn" class="btn btn-warning">
                         <span>🗑️</span> Limpar Dados Atuais
@@ -838,8 +624,8 @@
             <button id="addManualBtn" class="btn btn-primary">
                 <span>✏️</span> Adicionar Manualmente
             </button>
-            <button id="exportExcelBtn" class="btn btn-success">
-                <span>📊</span> Exportar para Excel (.XLSX)
+            <button id="syncNowBtn" class="btn btn-success">
+                <span>🔄</span> Sincronizar Agora
             </button>
         </div>
 
@@ -855,15 +641,13 @@
                             <th>Produto</th>
                             <th>Local</th>
                             <th>Quantidade</th>
-                            <th>Operador</th>
                             <th>Data/Hora</th>
-                            <th>Tipo</th>
-                            <th>Ação</th>
+                            <th>Status <button onclick="syncAllPending()" class="sync-btn">Sincronizar Tudo</button></th>
                         </tr>
                     </thead>
                     <tbody id="historyBody">
                         <tr>
-                            <td colspan="7" class="empty-state">
+                            <td colspan="5" class="empty-state">
                                 Nenhum item adicionado ainda. Comece escaneando!
                             </td>
                         </tr>
@@ -874,8 +658,8 @@
 
         <footer class="app-footer">
             <div>
-                <p>Sistema de Escaneamento de Estoque • Hospedado no GitHub Pages</p>
-                <p>Exportação em Excel (.XLSX) • Dados salvos localmente</p>
+                <p>Sistema de Escaneamento de Estoque • Armazenamento em Nuvem</p>
+                <p>Google Sheets • Dados sincronizados automaticamente</p>
             </div>
             <div class="stats-bar">
                 <div class="stat-item">
@@ -887,47 +671,72 @@
                     <div class="stat-label">Quantidade Total</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="lastUpdate">-</div>
-                    <div class="stat-label">Última Atualização</div>
+                    <div class="stat-value" id="syncedItems">0</div>
+                    <div class="stat-label">Sincronizados</div>
                 </div>
             </div>
         </footer>
     </div>
 
+    <!-- Modal de Configuração -->
+    <div class="modal" id="setupModal">
+        <div class="modal-content">
+            <h3>📋 Como Configurar o Google Sheets</h3>
+            <ol>
+                <li>Acesse <a href="https://docs.google.com/spreadsheets" target="_blank">Google Sheets</a></li>
+                <li>Crie uma nova planilha em branco</li>
+                <li>Na primeira linha, adicione os cabeçalhos:<br>
+                    <code>Data/Hora, Produto, Local, Quantidade, Operador, Tipo</code>
+                </li>
+                <li>Clique em "Compartilhar" → "Alterar para qualquer pessoa com o link"</li>
+                <li>Copie o ID da planilha da URL:<br>
+                    <code>https://docs.google.com/spreadsheets/d/<strong>SEU_ID_AQUI</strong>/edit</code>
+                </li>
+                <li>Cole o ID no campo acima e salve</li>
+                <li>Pronto! Seus dados serão salvos automaticamente</li>
+            </ol>
+            <button onclick="closeSetupModal()" class="btn btn-primary" style="width: 100%;">
+                🆗 Entendi
+            </button>
+        </div>
+    </div>
+
     <!-- Notificação -->
     <div id="notification" class="notification" style="display: none;"></div>
 
-    <!-- Link para GitHub -->
-    <a href="https://github.com" target="_blank" class="github-link">
-        <span>🐙</span> GitHub Pages
-    </a>
-
     <script>
         // ====================
-        // ESTADO DO SISTEMA
+        // CONFIGURAÇÕES DO GOOGLE SHEETS
         // ====================
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJcU8H_iRrcQKZJZQuJ0ITXJ9L8nq4O1hBPMx-VqBhmNwJAX5NChXPSB9Qn3pMJ-60/exec';
+        
         const appState = {
-            currentOperator: localStorage.getItem('estoqueOperator') || '',
+            googleSheetId: localStorage.getItem('estoqueGoogleSheetId') || '',
             currentProduct: null,
             currentLocation: null,
             currentQuantity: 1,
+            currentOperator: localStorage.getItem('estoqueOperator') || '',
             productScanner: null,
             locationScanner: null,
             isProductScanning: false,
             isLocationScanning: false,
             scannedItems: JSON.parse(localStorage.getItem('estoqueItems')) || [],
-            productCount: parseInt(localStorage.getItem('productCount')) || 0,
-            locationCount: parseInt(localStorage.getItem('locationCount')) || 0
+            pendingSync: JSON.parse(localStorage.getItem('estoquePendingSync')) || [],
+            isOnline: navigator.onLine
         };
 
         // ====================
         // ELEMENTOS DOM
         // ====================
         const DOM = {
-            // Campo do operador
-            operatorName: document.getElementById('operatorName'),
+            googleSheetId: document.getElementById('googleSheetId'),
+            syncStatus: document.getElementById('syncStatus'),
+            syncStatusLabel: document.getElementById('syncStatusLabel'),
+            syncStatusText: document.getElementById('syncStatusText'),
+            storageBadge: document.getElementById('storageBadge'),
+            setupGuideBtn: document.getElementById('setupGuideBtn'),
+            setupModal: document.getElementById('setupModal'),
             
-            // Scanners
             productCamera: document.getElementById('productCamera'),
             locationCamera: document.getElementById('locationCamera'),
             startProductBtn: document.getElementById('startProductBtn'),
@@ -939,23 +748,19 @@
             productResult: document.getElementById('productResult'),
             locationResult: document.getElementById('locationResult'),
             
-            // Quantidade
             quantitySimple: document.getElementById('quantitySimple'),
             
-            // Status e ações
             statusMessage: document.getElementById('statusMessage'),
             saveItemBtn: document.getElementById('saveItemBtn'),
             clearDataBtn: document.getElementById('clearDataBtn'),
             addManualBtn: document.getElementById('addManualBtn'),
-            exportExcelBtn: document.getElementById('exportExcelBtn'),
+            syncNowBtn: document.getElementById('syncNowBtn'),
             
-            // Histórico
             historyBody: document.getElementById('historyBody'),
             totalItems: document.getElementById('totalItems'),
             totalQuantity: document.getElementById('totalQuantity'),
-            lastUpdate: document.getElementById('lastUpdate'),
+            syncedItems: document.getElementById('syncedItems'),
             
-            // Notificação
             notification: document.getElementById('notification')
         };
 
@@ -963,28 +768,24 @@
         // INICIALIZAÇÃO
         // ====================
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Scanner Estoque - GitHub Pages');
-            console.log('👤 Sistema com registro de operador');
+            console.log('🚀 Scanner Estoque - Armazenamento em Nuvem');
             
             initApp();
             setupEventListeners();
             updateUI();
             
-            // Mostrar mensagem de boas-vindas
-            setTimeout(() => {
-                if (appState.currentOperator) {
-                    showNotification(`👋 Bem-vindo de volta, ${appState.currentOperator}!`, 'success');
-                } else {
-                    showNotification('✅ Sistema pronto! Digite seu nome e comece a escanear', 'info');
-                    DOM.operatorName.focus();
-                }
-            }, 800);
+            // Verificar conexão e config inicial
+            checkOnlineStatus();
+            loadGoogleSheetConfig();
+            
+            // Tentar sincronizar pendentes
+            setTimeout(syncPendingItems, 2000);
         });
 
         function initApp() {
-            // Carregar nome do operador salvo
-            if (appState.currentOperator) {
-                DOM.operatorName.value = appState.currentOperator;
+            // Carregar configuração do Google Sheets
+            if (appState.googleSheetId) {
+                DOM.googleSheetId.value = appState.googleSheetId;
             }
             
             // Inicializar scanners
@@ -994,38 +795,27 @@
             // Configurar input de quantidade
             setupQuantityInput();
             
-            // Atualizar contadores
-            updateCounters();
+            // Atualizar estatísticas
             updateStats();
         }
 
         function setupEventListeners() {
-            // Evento para salvar nome do operador
-            DOM.operatorName.addEventListener('input', function() {
-                const operatorName = this.value.trim();
-                appState.currentOperator = operatorName;
-                localStorage.setItem('estoqueOperator', operatorName);
-                
-                // Feedback visual
-                if (operatorName) {
-                    this.style.borderColor = '#10b981';
-                    this.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.2)';
-                } else {
-                    this.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    this.style.boxShadow = 'none';
-                }
+            // Configuração do Google Sheets
+            DOM.googleSheetId.addEventListener('input', saveGoogleSheetConfig);
+            DOM.googleSheetId.addEventListener('blur', testGoogleSheetConnection);
+            DOM.setupGuideBtn.addEventListener('click', showSetupModal);
+            DOM.syncNowBtn.addEventListener('click', syncAllPending);
+            
+            // Monitorar status online/offline
+            window.addEventListener('online', () => {
+                appState.isOnline = true;
+                updateSyncStatus();
+                syncPendingItems();
             });
             
-            // Evento para salvar ao pressionar Enter
-            DOM.operatorName.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    DOM.quantitySimple.focus();
-                    
-                    if (this.value.trim()) {
-                        showNotification(`👤 Operador: ${this.value.trim()}`, 'success');
-                    }
-                }
+            window.addEventListener('offline', () => {
+                appState.isOnline = false;
+                updateSyncStatus();
             });
             
             // Eventos dos scanners
@@ -1038,54 +828,155 @@
             DOM.saveItemBtn.addEventListener('click', saveCurrentItem);
             DOM.clearDataBtn.addEventListener('click', clearCurrentData);
             DOM.addManualBtn.addEventListener('click', addManualItem);
-            DOM.exportExcelBtn.addEventListener('click', exportToExcel);
-            
-            // Configurar scroll horizontal
-            setupTouchScrolling();
         }
 
-        function setupQuantityInput() {
-            DOM.quantitySimple.addEventListener('input', function(e) {
-                let value = this.value.replace(/[^0-9]/g, '');
-                
-                if (value === '') {
-                    this.value = '';
-                    appState.currentQuantity = 1;
-                    return;
-                }
-                
-                if (value === '0') {
-                    value = '1';
-                }
-                
-                if (value.length > 10) {
-                    value = value.substring(0, 10);
-                }
-                
-                this.value = value;
-                appState.currentQuantity = parseInt(value) || 1;
-            });
+        // ====================
+        // FUNÇÕES GOOGLE SHEETS
+        // ====================
+        function saveGoogleSheetConfig() {
+            const sheetId = DOM.googleSheetId.value.trim();
+            appState.googleSheetId = sheetId;
+            localStorage.setItem('estoqueGoogleSheetId', sheetId);
             
-            DOM.quantitySimple.addEventListener('paste', function(e) {
-                e.preventDefault();
-                const pastedData = e.clipboardData.getData('text');
-                const numbers = pastedData.replace(/[^0-9]/g, '');
-                this.value = numbers;
-                appState.currentQuantity = parseInt(numbers) || 1;
-            });
+            if (sheetId) {
+                showNotification('✅ Configuração do Google Sheets salva', 'success');
+                testGoogleSheetConnection();
+            }
+        }
+
+        async function testGoogleSheetConnection() {
+            if (!appState.googleSheetId) {
+                updateSyncStatus('offline', 'Configure o Google Sheets');
+                return;
+            }
+            
+            try {
+                updateSyncStatus('pending', 'Testando conexão...');
+                
+                const response = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?action=test&sheetId=${appState.googleSheetId}`);
+                
+                if (response.ok) {
+                    updateSyncStatus('online', 'Conectado ao Google Sheets');
+                    showNotification('✅ Conexão com Google Sheets estabelecida', 'success');
+                    
+                    // Sincronizar pendentes após conexão bem sucedida
+                    syncPendingItems();
+                } else {
+                    updateSyncStatus('offline', 'Erro na conexão');
+                    showNotification('❌ Erro ao conectar com Google Sheets', 'error');
+                }
+            } catch (error) {
+                console.error('Erro na conexão:', error);
+                updateSyncStatus('offline', 'Sem conexão com a internet');
+            }
+        }
+
+        async function saveToGoogleSheets(item) {
+            if (!appState.googleSheetId || !appState.isOnline) {
+                // Salvar como pendente para sincronização posterior
+                item.syncStatus = 'pending';
+                appState.pendingSync.push(item);
+                localStorage.setItem('estoquePendingSync', JSON.stringify(appState.pendingSync));
+                return false;
+            }
+            
+            try {
+                const data = {
+                    sheetId: appState.googleSheetId,
+                    action: 'append',
+                    data: {
+                        timestamp: item.timestamp,
+                        product: item.product,
+                        location: item.location,
+                        quantity: item.quantity,
+                        operator: item.operator || 'Não informado',
+                        type: item.type
+                    }
+                };
+                
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    item.syncStatus = 'synced';
+                    item.syncedAt = new Date().toLocaleString('pt-BR');
+                    return true;
+                } else {
+                    item.syncStatus = 'pending';
+                    appState.pendingSync.push(item);
+                    localStorage.setItem('estoquePendingSync', JSON.stringify(appState.pendingSync));
+                    return false;
+                }
+            } catch (error) {
+                console.error('Erro ao salvar no Google Sheets:', error);
+                item.syncStatus = 'pending';
+                appState.pendingSync.push(item);
+                localStorage.setItem('estoquePendingSync', JSON.stringify(appState.pendingSync));
+                return false;
+            }
+        }
+
+        async function syncPendingItems() {
+            if (!appState.isOnline || !appState.googleSheetId || appState.pendingSync.length === 0) {
+                return;
+            }
+            
+            updateSyncStatus('pending', 'Sincronizando itens pendentes...');
+            
+            const pendingCount = appState.pendingSync.length;
+            let syncedCount = 0;
+            
+            for (let i = appState.pendingSync.length - 1; i >= 0; i--) {
+                const item = appState.pendingSync[i];
+                if (item.syncStatus === 'pending') {
+                    const success = await saveToGoogleSheets(item);
+                    if (success) {
+                        syncedCount++;
+                        appState.pendingSync.splice(i, 1);
+                        
+                        // Atualizar o item na lista principal
+                        const mainItem = appState.scannedItems.find(it => it.id === item.id);
+                        if (mainItem) {
+                            mainItem.syncStatus = 'synced';
+                            mainItem.syncedAt = item.syncedAt;
+                        }
+                    }
+                }
+            }
+            
+            localStorage.setItem('estoquePendingSync', JSON.stringify(appState.pendingSync));
+            localStorage.setItem('estoqueItems', JSON.stringify(appState.scannedItems));
+            
+            if (syncedCount > 0) {
+                showNotification(`✅ ${syncedCount} itens sincronizados com sucesso`, 'success');
+                updateUI();
+            }
+            
+            updateSyncStatus();
+        }
+
+        async function syncAllPending() {
+            if (!appState.googleSheetId) {
+                showNotification('❌ Configure o Google Sheets primeiro', 'error');
+                DOM.googleSheetId.focus();
+                return;
+            }
+            
+            if (!appState.isOnline) {
+                showNotification('❌ Sem conexão com a internet', 'error');
+                return;
+            }
+            
+            await syncPendingItems();
         }
 
         // ====================
         // FUNÇÕES DO SCANNER
         // ====================
         async function startScanner(type) {
-            // Verificar se o operador foi informado
-            if (!appState.currentOperator) {
-                showNotification('Digite seu nome antes de escanear!', 'error');
-                DOM.operatorName.focus();
-                return;
-            }
-            
             if ((type === 'product' && appState.isProductScanning) || 
                 (type === 'location' && appState.isLocationScanning)) {
                 return;
@@ -1097,15 +988,8 @@
                     throw new Error('Nenhuma câmera detectada');
                 }
                 
-                const cameraId = cameras.find(c => 
-                    c.label.toLowerCase().includes('back') || 
-                    c.label.includes('2')
-                )?.id || cameras[0].id;
-                
+                const cameraId = cameras[0].id;
                 const scanner = type === 'product' ? appState.productScanner : appState.locationScanner;
-                const cameraElement = type === 'product' ? DOM.productCamera : DOM.locationCamera;
-                
-                cameraElement.classList.add('scanner-active');
                 
                 await scanner.start(
                     cameraId,
@@ -1137,9 +1021,6 @@
             } catch (error) {
                 console.error(`Erro ao iniciar scanner ${type}:`, error);
                 showNotification('Erro ao acessar câmera. Verifique as permissões.', 'error');
-                
-                const cameraElement = type === 'product' ? DOM.productCamera : DOM.locationCamera;
-                cameraElement.classList.remove('scanner-active');
             }
         }
 
@@ -1159,93 +1040,37 @@
                     DOM.startLocationBtn.disabled = false;
                     DOM.stopLocationBtn.disabled = true;
                 }
-                
-                const cameraElement = type === 'product' ? DOM.productCamera : DOM.locationCamera;
-                cameraElement.classList.remove('scanner-active');
-                
             }).catch(console.error);
         }
 
         function handleScanSuccess(type, decodedText) {
             const value = decodedText.trim();
             
-            // Feedback tátil
             if (navigator.vibrate) navigator.vibrate(100);
-            
-            // Feedback visual
-            const cameraElement = type === 'product' ? DOM.productCamera : DOM.locationCamera;
-            cameraElement.style.boxShadow = `0 0 30px ${type === 'product' ? '#10b981' : '#3b82f6'}`;
-            setTimeout(() => {
-                cameraElement.style.boxShadow = 'none';
-            }, 500);
             
             if (type === 'product') {
                 appState.currentProduct = value;
-                appState.productCount++;
-                localStorage.setItem('productCount', appState.productCount);
                 DOM.productResult.textContent = value;
-                DOM.productCount.textContent = appState.productCount;
                 showNotification(`✅ Produto: ${value}`, 'success');
             } else {
                 appState.currentLocation = value;
-                appState.locationCount++;
-                localStorage.setItem('locationCount', appState.locationCount);
                 DOM.locationResult.textContent = value;
-                DOM.locationCount.textContent = appState.locationCount;
                 showNotification(`📍 Local: ${value}`, 'success');
             }
             
             updateStatus();
-            
-            // Parar scanner após leitura
-            setTimeout(() => {
-                stopScanner(type);
-            }, 1000);
+            stopScanner(type);
         }
 
         // ====================
-        // STATUS DO ESCANEAMENTO
+        // SALVAR ITEM
         // ====================
-        function updateStatus() {
-            const hasProduct = appState.currentProduct !== null;
-            const hasLocation = appState.currentLocation !== null;
-            
-            if (hasProduct && hasLocation) {
-                DOM.statusMessage.innerHTML = '✅ <strong>PRONTO PARA SALVAR!</strong> Produto e local escaneados.';
-                DOM.statusMessage.className = 'status-message status-ready';
-                DOM.saveItemBtn.disabled = false;
-            } else if (hasProduct) {
-                DOM.statusMessage.innerHTML = '⏳ Aguardando escaneamento do <strong>LOCAL</strong>...';
-                DOM.statusMessage.className = 'status-message status-waiting';
-                DOM.saveItemBtn.disabled = true;
-            } else if (hasLocation) {
-                DOM.statusMessage.innerHTML = '⏳ Aguardando escaneamento do <strong>PRODUTO</strong>...';
-                DOM.statusMessage.className = 'status-message status-waiting';
-                DOM.saveItemBtn.disabled = true;
-            } else {
-                DOM.statusMessage.innerHTML = '⏳ Aguardando escaneamento de produto e local...';
-                DOM.statusMessage.className = 'status-message status-waiting';
-                DOM.saveItemBtn.disabled = true;
-            }
-        }
-
-        // ====================
-        // SALVAR ITEM (COM OPERADOR)
-        // ====================
-        function saveCurrentItem() {
-            // Verificar se o operador foi informado
-            if (!appState.currentOperator) {
-                showNotification('Digite seu nome antes de salvar!', 'error');
-                DOM.operatorName.focus();
-                return;
-            }
-            
+        async function saveCurrentItem() {
             if (!appState.currentProduct || !appState.currentLocation) {
                 showNotification('Escaneie o produto e o local primeiro!', 'error');
                 return;
             }
             
-            // Atualizar quantidade do campo
             const quantityValue = DOM.quantitySimple.value;
             appState.currentQuantity = quantityValue === '' ? 1 : parseInt(quantityValue) || 1;
             
@@ -1257,17 +1082,29 @@
                 operator: appState.currentOperator,
                 timestamp: new Date().toLocaleString('pt-BR'),
                 type: 'scanned',
-                dataRegistro: new Date().toISOString()
+                dataRegistro: new Date().toISOString(),
+                syncStatus: 'pending'
             };
             
+            // Salvar localmente
             appState.scannedItems.unshift(newItem);
             localStorage.setItem('estoqueItems', JSON.stringify(appState.scannedItems));
             
-            updateHistory();
-            updateStats();
-            clearCurrentData();
+            // Tentar salvar na nuvem
+            const cloudSaved = await saveToGoogleSheets(newItem);
             
-            showNotification(`✅ Item salvo por ${appState.currentOperator}: ${appState.currentQuantity}x ${appState.currentProduct}`, 'success');
+            if (cloudSaved) {
+                newItem.syncStatus = 'synced';
+                newItem.syncedAt = new Date().toLocaleString('pt-BR');
+                showNotification(`✅ Item salvo na nuvem: ${appState.currentQuantity}x ${appState.currentProduct}`, 'success');
+            } else if (appState.isOnline && appState.googleSheetId) {
+                showNotification(`⚠️ Item salvo localmente (erro na nuvem): ${appState.currentQuantity}x ${appState.currentProduct}`, 'warning');
+            } else {
+                showNotification(`💾 Item salvo localmente (sincronizar depois): ${appState.currentQuantity}x ${appState.currentProduct}`, 'info');
+            }
+            
+            updateUI();
+            clearCurrentData();
         }
 
         function clearCurrentData() {
@@ -1280,24 +1117,12 @@
             DOM.quantitySimple.value = '';
             
             updateStatus();
-            
-            // Focar no campo de quantidade após limpar
-            setTimeout(() => {
-                DOM.quantitySimple.focus();
-            }, 100);
         }
 
         // ====================
-        // ADIÇÃO MANUAL (COM OPERADOR)
+        // ADIÇÃO MANUAL
         // ====================
-        function addManualItem() {
-            // Verificar se o operador foi informado
-            if (!appState.currentOperator) {
-                showNotification('Digite seu nome antes de adicionar manualmente!', 'error');
-                DOM.operatorName.focus();
-                return;
-            }
-            
+        async function addManualItem() {
             const product = prompt('Digite o código do produto:');
             if (!product) return;
             
@@ -1315,115 +1140,116 @@
                 operator: appState.currentOperator,
                 timestamp: new Date().toLocaleString('pt-BR'),
                 type: 'manual',
-                dataRegistro: new Date().toISOString()
+                dataRegistro: new Date().toISOString(),
+                syncStatus: 'pending'
             };
             
             appState.scannedItems.unshift(newItem);
             localStorage.setItem('estoqueItems', JSON.stringify(appState.scannedItems));
             
-            updateHistory();
-            updateStats();
-            showNotification(`✅ Item manual por ${appState.currentOperator}: ${quantity}x ${product}`, 'success');
-        }
-
-        // ====================
-        // EXPORTAR PARA EXCEL (COM OPERADOR)
-        // ====================
-        function exportToExcel() {
-            if (appState.scannedItems.length === 0) {
-                showNotification('Nenhum dado para exportar!', 'error');
-                return;
+            // Tentar salvar na nuvem
+            const cloudSaved = await saveToGoogleSheets(newItem);
+            
+            if (cloudSaved) {
+                newItem.syncStatus = 'synced';
+                newItem.syncedAt = new Date().toLocaleString('pt-BR');
+                showNotification(`✅ Item manual salvo na nuvem: ${quantity}x ${product}`, 'success');
+            } else {
+                showNotification(`💾 Item manual salvo localmente: ${quantity}x ${product}`, 'info');
             }
             
-            try {
-                // Preparar dados para Excel incluindo operador
-                const excelData = appState.scannedItems.map((item, index) => ({
-                    'ID': item.id,
-                    'Produto': item.product,
-                    'Local': item.location,
-                    'Quantidade': item.quantity,
-                    'Operador': item.operator,
-                    'Data': item.timestamp.split(' ')[0],
-                    'Hora': item.timestamp.split(' ')[1],
-                    'Tipo': item.type === 'scanned' ? 'Escaneado' : 'Manual',
-                    'Data Completa': item.timestamp
-                }));
-                
-                // Criar worksheet
-                const ws = XLSX.utils.json_to_sheet(excelData);
-                
-                // Ajustar largura das colunas
-                const wscols = [
-                    { wch: 15 }, // ID
-                    { wch: 25 }, // Produto
-                    { wch: 25 }, // Local
-                    { wch: 12 }, // Quantidade
-                    { wch: 20 }, // Operador
-                    { wch: 12 }, // Data
-                    { wch: 10 }, // Hora
-                    { wch: 12 }, // Tipo
-                    { wch: 20 }  // Data Completa
-                ];
-                ws['!cols'] = wscols;
-                
-                // Adicionar cabeçalho com estilo
-                const range = XLSX.utils.decode_range(ws['!ref']);
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    const address = XLSX.utils.encode_col(C) + "1";
-                    if (!ws[address]) continue;
-                    ws[address].s = {
-                        font: { bold: true, color: { rgb: "FFFFFF" } },
-                        fill: { fgColor: { rgb: "1A2980" } },
-                        alignment: { horizontal: "center" }
-                    };
-                }
-                
-                // Criar workbook
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Estoque");
-                
-                // Adicionar uma segunda sheet com totais
-                const totalsData = [{
-                    'Operador Atual': appState.currentOperator || 'Não informado',
-                    'Total de Itens': appState.scannedItems.length,
-                    'Quantidade Total': appState.scannedItems.reduce((sum, item) => sum + item.quantity, 0),
-                    'Data da Exportação': new Date().toLocaleString('pt-BR'),
-                    'Itens Escaneados': appState.scannedItems.filter(item => item.type === 'scanned').length,
-                    'Itens Manuais': appState.scannedItems.filter(item => item.type === 'manual').length
-                }];
-                
-                const ws2 = XLSX.utils.json_to_sheet(totalsData);
-                XLSX.utils.book_append_sheet(wb, ws2, "Resumo");
-                
-                // Gerar nome do arquivo com operador ou data
-                let fileName;
-                if (appState.currentOperator) {
-                    fileName = `estoque_${appState.currentOperator.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`;
-                } else {
-                    fileName = `estoque_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}_${new Date().getTime()}.xlsx`;
-                }
-                
-                // Salvar arquivo
-                XLSX.writeFile(wb, fileName);
-                
-                showNotification('📊 Excel (.XLSX) exportado com sucesso!', 'success');
-                
-            } catch (error) {
-                console.error('Erro ao exportar Excel:', error);
-                showNotification('Erro ao exportar Excel. Tente novamente.', 'error');
-            }
+            updateUI();
         }
 
         // ====================
-        // HISTÓRICO (COM OPERADOR)
+        // UI E STATUS
         // ====================
+        function updateStatus() {
+            const hasProduct = appState.currentProduct !== null;
+            const hasLocation = appState.currentLocation !== null;
+            
+            if (hasProduct && hasLocation) {
+                DOM.statusMessage.innerHTML = '✅ <strong>PRONTO PARA SALVAR!</strong> Produto e local escaneados.';
+                DOM.statusMessage.className = 'status-message status-ready';
+                DOM.saveItemBtn.disabled = false;
+            } else if (hasProduct) {
+                DOM.statusMessage.innerHTML = '⏳ Aguardando escaneamento do <strong>LOCAL</strong>...';
+                DOM.statusMessage.className = 'status-message';
+                DOM.saveItemBtn.disabled = true;
+            } else if (hasLocation) {
+                DOM.statusMessage.innerHTML = '⏳ Aguardando escaneamento do <strong>PRODUTO</strong>...';
+                DOM.statusMessage.className = 'status-message';
+                DOM.saveItemBtn.disabled = true;
+            } else {
+                DOM.statusMessage.innerHTML = '⏳ Aguardando escaneamento de produto e local...';
+                DOM.statusMessage.className = 'status-message';
+                DOM.saveItemBtn.disabled = true;
+            }
+        }
+
+        function updateSyncStatus(status, message) {
+            if (status) {
+                appState.syncStatus = status;
+            }
+            
+            let syncClass, syncLabel, syncText, badgeClass, badgeText;
+            
+            if (!appState.googleSheetId) {
+                syncClass = 'sync-offline';
+                syncLabel = 'Google Sheets não configurado';
+                syncText = '⚙️ Configure o Google Sheets';
+                badgeClass = 'local';
+                badgeText = '💾 Dados apenas localmente';
+            } else if (!appState.isOnline) {
+                syncClass = 'sync-offline';
+                syncLabel = 'Sem conexão com a internet';
+                syncText = '📴 Offline';
+                badgeClass = 'local';
+                badgeText = '💾 Modo offline - Dados locais';
+            } else if (message) {
+                syncClass = 'sync-pending';
+                syncLabel = message;
+                syncText = '🔄 Sincronizando...';
+                badgeClass = 'cloud';
+                badgeText = '☁️ Sincronizando com nuvem...';
+            } else {
+                const pendingCount = appState.pendingSync.length;
+                if (pendingCount > 0) {
+                    syncClass = 'sync-pending';
+                    syncLabel = `${pendingCount} itens pendentes`;
+                    syncText = `🔄 ${pendingCount} pendente(s)`;
+                    badgeClass = 'cloud';
+                    badgeText = '⚠️ Dados parcialmente sincronizados';
+                } else {
+                    syncClass = 'sync-online';
+                    syncLabel = 'Sincronizado com a nuvem';
+                    syncText = '✅ Sincronizado';
+                    badgeClass = 'cloud';
+                    badgeText = '☁️ Dados sincronizados na nuvem';
+                }
+            }
+            
+            DOM.syncStatus.className = `sync-status ${syncClass}`;
+            DOM.syncStatusLabel.textContent = syncLabel;
+            DOM.syncStatusText.textContent = syncText;
+            DOM.storageBadge.className = `storage-badge ${badgeClass}`;
+            DOM.storageBadge.textContent = badgeText;
+        }
+
+        function updateUI() {
+            updateStatus();
+            updateHistory();
+            updateStats();
+            updateSyncStatus();
+        }
+
         function updateHistory() {
             const tbody = DOM.historyBody;
             
             if (appState.scannedItems.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="empty-state">
+                        <td colspan="5" class="empty-state">
                             Nenhum item adicionado ainda. Comece escaneando!
                         </td>
                     </tr>
@@ -1436,97 +1262,102 @@
                     <td><strong>${item.product}</strong></td>
                     <td>${item.location}</td>
                     <td><strong style="color: #1a2980; font-size: 1.1rem;">${item.quantity}</strong></td>
+                    <td>${item.timestamp}</td>
                     <td>
-                        <span class="operator-badge">${item.operator}</span>
-                    </td>
-                    <td>
-                        <div>${item.timestamp}</div>
-                        <span class="badge ${item.type === 'scanned' ? 'badge-scanned' : 'badge-manual'}">
-                            ${item.type === 'scanned' ? '📱 Escaneado' : '✏️ Manual'}
-                        </span>
-                    </td>
-                    <td>${item.type === 'scanned' ? 'Escaneado' : 'Manual'}</td>
-                    <td>
-                        <button onclick="deleteItem(${item.id})" class="delete-action">
-                            Excluir
-                        </button>
+                        ${getSyncBadge(item.syncStatus)}
+                        ${item.syncStatus === 'pending' ? 
+                            `<button onclick="syncSingleItem(${item.id})" class="sync-btn">Sincronizar</button>` : 
+                            item.syncedAt ? `<small>(${item.syncedAt})</small>` : ''
+                        }
                     </td>
                 </tr>
             `).join('');
         }
 
-        window.deleteItem = function(id) {
-            if (confirm('Tem certeza que deseja excluir este item?')) {
-                appState.scannedItems = appState.scannedItems.filter(item => item.id !== id);
-                localStorage.setItem('estoqueItems', JSON.stringify(appState.scannedItems));
-                
-                updateHistory();
-                updateStats();
-                showNotification('🗑️ Item excluído do histórico', 'info');
+        function getSyncBadge(status) {
+            switch(status) {
+                case 'synced':
+                    return '<span style="color: #4caf50; font-weight: bold;">✅ Sincronizado</span>';
+                case 'pending':
+                    return '<span style="color: #ff9800; font-weight: bold;">🔄 Pendente</span>';
+                default:
+                    return '<span style="color: #9e9e9e; font-weight: bold;">❓ Desconhecido</span>';
             }
-        };
+        }
 
-        // ====================
-        // ESTATÍSTICAS
-        // ====================
         function updateStats() {
             DOM.totalItems.textContent = appState.scannedItems.length;
             
             const totalQty = appState.scannedItems.reduce((sum, item) => sum + item.quantity, 0);
             DOM.totalQuantity.textContent = totalQty.toLocaleString('pt-BR');
             
-            DOM.lastUpdate.textContent = new Date().toLocaleTimeString('pt-BR', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function updateCounters() {
-            DOM.productCount.textContent = appState.productCount;
-            DOM.locationCount.textContent = appState.locationCount;
+            const syncedCount = appState.scannedItems.filter(item => item.syncStatus === 'synced').length;
+            DOM.syncedItems.textContent = syncedCount;
         }
 
         // ====================
-        // ATUALIZAR UI
+        // FUNÇÕES AUXILIARES
         // ====================
-        function updateUI() {
-            updateStatus();
-            updateHistory();
-            updateStats();
-            updateCounters();
+        function setupQuantityInput() {
+            DOM.quantitySimple.addEventListener('input', function(e) {
+                let value = this.value.replace(/[^0-9]/g, '');
+                
+                if (value === '') {
+                    this.value = '';
+                    appState.currentQuantity = 1;
+                    return;
+                }
+                
+                if (value === '0') {
+                    value = '1';
+                }
+                
+                this.value = value;
+                appState.currentQuantity = parseInt(value) || 1;
+            });
         }
 
-        // ====================
-        // FUNÇÃO AUXILIAR: SCROLL HORIZONTAL
-        // ====================
-        function setupTouchScrolling() {
-            const tableWrapper = document.querySelector('.table-wrapper');
-            if (!tableWrapper) return;
+        function checkOnlineStatus() {
+            appState.isOnline = navigator.onLine;
+            updateSyncStatus();
+        }
+
+        function loadGoogleSheetConfig() {
+            if (appState.googleSheetId) {
+                testGoogleSheetConnection();
+            } else {
+                updateSyncStatus('offline', 'Configure o Google Sheets');
+            }
+        }
+
+        function showSetupModal() {
+            DOM.setupModal.style.display = 'flex';
+        }
+
+        function closeSetupModal() {
+            DOM.setupModal.style.display = 'none';
+        }
+
+        async function syncSingleItem(id) {
+            const item = appState.scannedItems.find(it => it.id === id);
+            if (!item) return;
             
-            let isScrolling = false;
-            let startX, scrollLeft;
-            
-            tableWrapper.addEventListener('touchstart', (e) => {
-                isScrolling = true;
-                startX = e.touches[0].pageX - tableWrapper.offsetLeft;
-                scrollLeft = tableWrapper.scrollLeft;
-                tableWrapper.style.cursor = 'grabbing';
-            });
-            
-            tableWrapper.addEventListener('touchmove', (e) => {
-                if (!isScrolling) return;
-                e.preventDefault();
-                const x = e.touches[0].pageX - tableWrapper.offsetLeft;
-                const walk = (x - startX) * 2;
-                tableWrapper.scrollLeft = scrollLeft - walk;
-            });
-            
-            tableWrapper.addEventListener('touchend', () => {
-                isScrolling = false;
-                tableWrapper.style.cursor = 'grab';
-            });
-            
-            tableWrapper.style.cursor = 'grab';
+            const success = await saveToGoogleSheets(item);
+            if (success) {
+                item.syncStatus = 'synced';
+                item.syncedAt = new Date().toLocaleString('pt-BR');
+                localStorage.setItem('estoqueItems', JSON.stringify(appState.scannedItems));
+                
+                // Remover dos pendentes
+                const pendingIndex = appState.pendingSync.findIndex(it => it.id === id);
+                if (pendingIndex > -1) {
+                    appState.pendingSync.splice(pendingIndex, 1);
+                    localStorage.setItem('estoquePendingSync', JSON.stringify(appState.pendingSync));
+                }
+                
+                showNotification('✅ Item sincronizado com sucesso', 'success');
+                updateUI();
+            }
         }
 
         // ====================
@@ -1544,6 +1375,13 @@
         }
 
         // ====================
+        // EXPORTAR FUNÇÕES GLOBAIS
+        // ====================
+        window.syncAllPending = syncAllPending;
+        window.syncSingleItem = syncSingleItem;
+        window.closeSetupModal = closeSetupModal;
+
+        // ====================
         // LIMPEZA
         // ====================
         window.addEventListener('beforeunload', () => {
@@ -1554,9 +1392,6 @@
                 appState.locationScanner.stop().catch(() => {});
             }
         });
-
-        // Melhorar UX em dispositivos touch
-        document.addEventListener('touchstart', () => {}, { passive: true });
     </script>
 </body>
 </html>
